@@ -1,0 +1,9 @@
+# Local agent-skill discovery links used while developing this repo.
+# These are junctions created on this machine (see README/notes) and must
+# not be committed: Git for Windows expands a junction into duplicated files.
+.agents/
+.claude/
+skills-lock.json
+
+# Installed npm dependencies (Prettier tooling and per-skill packages).
+node_modules/

@@ -120,6 +120,20 @@ The skill contents in this repository are intentionally kept as portable as poss
 
 Always refer to the documentation of the agent you are using when configuring global or project-level skills.
 
+## Development
+
+### Formatting
+
+The repository is formatted with [Prettier](https://prettier.io/). Node.js 24+ and npm are required.
+
+```bash
+npm ci                # Install the formatter
+npm run format        # Format all files
+npm run format:check  # Check formatting without writing
+```
+
+Indentation, line endings, and whitespace rules come from `.editorconfig`; Prettier-specific options live in `.prettierrc.json`. CI runs `npm run format:check` on every push and pull request.
+
 ## Contributing
 
 This is primarily my personal collection of shared Agent Skills, but suggestions, improvements, and bug reports are welcome.
