@@ -14,7 +14,7 @@ All modes preserve the same evidence standard. Markdown is sufficient for a quic
 
 ## Local report validation
 
-Node.js **22+** and npm are required only for the helper scripts. Run these commands from this skill directory:
+Node.js **24+** and npm are required only for the helper scripts. Run these commands from this skill directory:
 
 ```bash
 npm ci

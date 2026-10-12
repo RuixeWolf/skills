@@ -39,4 +39,4 @@ Report per-dimension pass/fail/not-assessable with a passage or artifact explain
 
 ## Validator regression tests
 
-Run `npm ci` once, then `npm test` from the skill directory with Node.js 22+. These exercise contract enforcement, CLI behavior, synthetic examples, and migration limits. A passing test suite means these software checks work on their test inputs; it says nothing by itself about an agent's fact-checking accuracy.
+Run `npm ci` once, then `npm test` from the skill directory with Node.js 24+. These exercise contract enforcement, CLI behavior, synthetic examples, and migration limits. A passing test suite means these software checks work on their test inputs; it says nothing by itself about an agent's fact-checking accuracy.

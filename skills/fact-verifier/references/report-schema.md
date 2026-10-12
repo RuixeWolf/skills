@@ -35,7 +35,7 @@ See [verification-loop.md](verification-loop.md) for rounds, resolved questions,
 
 ## Validator use
 
-With Node.js 22+, install dependencies from the skill directory. Then run there, or use absolute script and input paths from any working directory:
+With Node.js 24+, install dependencies from the skill directory. Then run there, or use absolute script and input paths from any working directory:
 
 ```bash
 npm ci
