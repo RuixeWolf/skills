@@ -2,11 +2,11 @@
 
 Read this when choosing depth, investigating a disputed claim, or resuming a long check. Modes change coverage, budget, and presentation, never the evidential standard.
 
-| Mode | Default use | Coverage and output |
-| --- | --- | --- |
-| `quick` | One narrow claim or an explicit request for brevity | Investigate the selected proposition; a short verdict, direct sources, uncertainty, and closing summary can be sufficient. Disclose unexamined subclaims. |
-| `standard` | Default for an article or several claims | Inventory candidates, check central claims, disclose omissions, and show the claim/evidence relationship. |
-| `deep` | Explicit request, consequential disputed claims, complex lineage or causality | Investigate unresolved premises and alternative interpretations; provide the fuller audit trail. |
+| Mode       | Default use                                                                   | Coverage and output                                                                                                                                       |
+| ---------- | ----------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quick`    | One narrow claim or an explicit request for brevity                           | Investigate the selected proposition; a short verdict, direct sources, uncertainty, and closing summary can be sufficient. Disclose unexamined subclaims. |
+| `standard` | Default for an article or several claims                                      | Inventory candidates, check central claims, disclose omissions, and show the claim/evidence relationship.                                                 |
+| `deep`     | Explicit request, consequential disputed claims, complex lineage or causality | Investigate unresolved premises and alternative interpretations; provide the fuller audit trail.                                                          |
 
 Infer a suitable mode from the request. Ask only when the budget or coverage tradeoff materially affects the user's goal. Do not force a tier selector or a fixed number of searches or sources. Upgrade when a supposedly narrow claim has consequential subclaims or conflicting evidence; explain scope and limits if resources prevent that upgrade. A comparison request uses the same modes and shared claim identities across texts, with text fidelity and external factuality assessed separately.
 
@@ -19,13 +19,13 @@ Infer a suitable mode from the request. Ask only when the budget or coverage tra
 5. **Check sufficiency.** Resolve a question only when cited evidence addresses its material conditions. If a premise remains open, refine the query using the missing person, period, dataset, language, or record. Avoid repeating a query that only retrieves the same upstream material.
 6. **Stop explicitly.** Record completed rounds and a stop reason. Retain unresolved questions and material gaps. Save a checkpoint only when the task needs durable files and the host permits it; resume from actual saved evidence and queries, not reconstructed access history.
 
-| `stopReason` | Meaning and consequence |
-| --- | --- |
-| `evidence_sufficient` | Material questions resolved, active countersearch completed, no material gap remains. It does not imply certainty or multiple independent sources. |
-| `budget_exhausted` | Time, tool-call or context budget reached; name the remaining gaps. A narrower directional conclusion is possible only if the claim as written is already adequately supported. |
-| `source_unavailable` | Necessary material could not be inspected. Use `unverified` if this prevents deciding the claim. |
-| `unresolved_conflict` | Applicable evidence conflicts on a material premise. Use `unverified`; describe both sides without voting by URL count. |
-| `tool_unavailable` | Online retrieval could not be performed. Use `unverified`; distinguish it from a completed search with no evidence. |
+| `stopReason`          | Meaning and consequence                                                                                                                                                         |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `evidence_sufficient` | Material questions resolved, active countersearch completed, no material gap remains. It does not imply certainty or multiple independent sources.                              |
+| `budget_exhausted`    | Time, tool-call or context budget reached; name the remaining gaps. A narrower directional conclusion is possible only if the claim as written is already adequately supported. |
+| `source_unavailable`  | Necessary material could not be inspected. Use `unverified` if this prevents deciding the claim.                                                                                |
+| `unresolved_conflict` | Applicable evidence conflicts on a material premise. Use `unverified`; describe both sides without voting by URL count.                                                         |
+| `tool_unavailable`    | Online retrieval could not be performed. Use `unverified`; distinguish it from a completed search with no evidence.                                                             |
 
 Structured reports put this in `claims[].verification`. Rounds count attempted retrieval rounds for that claim, including failed attempts; they equal the highest recorded query round, or zero when no query was attempted. Question `queryIds` and `evidenceIds` point to the actual audit entries. Material unresolved questions require an explanation in `remainingGaps` and prevent a directional verdict even at budget exhaustion. A lack of independent corroboration can be disclosed in confidence and limitations even when one uniquely authoritative record suffices.
 

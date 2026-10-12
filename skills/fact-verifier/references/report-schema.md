@@ -14,20 +14,20 @@ Use [report.schema.json](report.schema.json) for new machine-readable reports (M
 
 ## v0.3 fields
 
-| Field | Contract |
-| --- | --- |
-| `reportId`, `verificationMode` | Nonempty report identity and `quick | standard | deep`; give revisions a new identity. |
-| `input.language` | Actual input language; preserve multilingual source languages separately. |
-| `claims[].verification` | Required only for checked claims: nonempty `questions`, `rounds`, `stopReason`, `remainingGaps`. Questions have IDs, text, resolved/unresolved status, evidence IDs and query IDs. |
-| `claims[].suggestedCorrection` | Optional text, reason, same-claim evidence IDs, and `correct | qualify | update | withhold`. Unverified claims may only suggest withholding. |
-| `claims[].historyMatches` | Optional earlier report/claim identities, scope comparison, and `reuse_after_recheck | recheck | reject`. History never replaces fresh evidence. |
-| `evidence[].contentKind` | `quote | summary`; `excerptOrSummary` remains the text field. Literal quotes can be compared with an explicitly supplied source-text map. |
-| `evidence[].language`, `applicability`, `directness` | Language or null; period/region/population or null; `direct | indirect | unknown`. State unknowns instead of inventing scope. |
-| `sources[].snapshot` | Optional `artifactPath` and SHA-256 metadata for a permitted saved copy. The validator never follows these paths, fetches URLs, or certifies the hash. |
-| `audit.queries[]` | `id`, `claimId`, `round`, `text`, `purpose`, `searchedAt`, `outcome`, `sourceIds`; an error requires `note`. Empty/failed searches have no result source IDs. |
-| `audit.finalReview` | Status, checked claim IDs, `summaryChecked`, and notes. Complete review covers every checked claim and the summary. Incomplete review is a draft warning. |
-| `audit.model`, `audit.tools` | Optional known model name and tool name/version records; use null or omission for unknown versions. No hidden reasoning transcript is required. |
-| `revision` | Earlier report identity, reason, and claim changes with old/new verdicts, rationale, and current evidence IDs. |
+| Field                                                | Contract                                                                                                                                                                           |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `reportId`, `verificationMode`                       | Nonempty report identity and `quick                                                                                                                                                | standard                                                                                                                         | deep`; give revisions a new identity.                |
+| `input.language`                                     | Actual input language; preserve multilingual source languages separately.                                                                                                          |
+| `claims[].verification`                              | Required only for checked claims: nonempty `questions`, `rounds`, `stopReason`, `remainingGaps`. Questions have IDs, text, resolved/unresolved status, evidence IDs and query IDs. |
+| `claims[].suggestedCorrection`                       | Optional text, reason, same-claim evidence IDs, and `correct                                                                                                                       | qualify                                                                                                                          | update                                               | withhold`. Unverified claims may only suggest withholding. |
+| `claims[].historyMatches`                            | Optional earlier report/claim identities, scope comparison, and `reuse_after_recheck                                                                                               | recheck                                                                                                                          | reject`. History never replaces fresh evidence.      |
+| `evidence[].contentKind`                             | `quote                                                                                                                                                                             | summary`; `excerptOrSummary` remains the text field. Literal quotes can be compared with an explicitly supplied source-text map. |
+| `evidence[].language`, `applicability`, `directness` | Language or null; period/region/population or null; `direct                                                                                                                        | indirect                                                                                                                         | unknown`. State unknowns instead of inventing scope. |
+| `sources[].snapshot`                                 | Optional `artifactPath` and SHA-256 metadata for a permitted saved copy. The validator never follows these paths, fetches URLs, or certifies the hash.                             |
+| `audit.queries[]`                                    | `id`, `claimId`, `round`, `text`, `purpose`, `searchedAt`, `outcome`, `sourceIds`; an error requires `note`. Empty/failed searches have no result source IDs.                      |
+| `audit.finalReview`                                  | Status, checked claim IDs, `summaryChecked`, and notes. Complete review covers every checked claim and the summary. Incomplete review is a draft warning.                          |
+| `audit.model`, `audit.tools`                         | Optional known model name and tool name/version records; use null or omission for unknown versions. No hidden reasoning transcript is required.                                    |
+| `revision`                                           | Earlier report identity, reason, and claim changes with old/new verdicts, rationale, and current evidence IDs.                                                                     |
 
 All IDs are local to their respective collections. Reference them exactly. Use `parentClaimId` for an actual retained composite claim; do not point to a nonexistent original. Every article candidate needs an original passage. Source dependencies and claim-parent relationships must be acyclic. Evidence must appear in its target claim's `evidenceIds`; question and correction references must belong to that claim.
 

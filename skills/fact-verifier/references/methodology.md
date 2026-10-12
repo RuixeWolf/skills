@@ -40,15 +40,15 @@ Evidence quality measures how useful this particular material is for this partic
 
 Compare support and contradiction by independent evidence cluster, directness, and applicability. Do not vote by URL count or add source scores. Use these `verdict` values:
 
-| Value | Use when |
-| --- | --- |
-| `supported` | Reliable evidence clearly supports the proposition with its stated qualifiers. |
-| `mostly_supported` | The core fact holds, but some details are inaccurate without changing its essential meaning. |
-| `misleading` | Some facts may hold, but missing context, a comparison baseline, or time frame creates a materially wrong impression. |
-| `contradicted` | Applicable, reliable evidence directly conflicts with the core proposition. |
-| `unverified` | Available evidence is insufficient or inaccessible, conflicts remain unresolved, or it is too early to know. |
-| `outdated` | The claim can be established for an earlier time but is no longer true as framed now; specify both times. |
-| `not_fact_checkable` | A pure value judgment, operationally vague assertion, or prediction without an observable present fact. |
+| Value                | Use when                                                                                                              |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `supported`          | Reliable evidence clearly supports the proposition with its stated qualifiers.                                        |
+| `mostly_supported`   | The core fact holds, but some details are inaccurate without changing its essential meaning.                          |
+| `misleading`         | Some facts may hold, but missing context, a comparison baseline, or time frame creates a materially wrong impression. |
+| `contradicted`       | Applicable, reliable evidence directly conflicts with the core proposition.                                           |
+| `unverified`         | Available evidence is insufficient or inaccessible, conflicts remain unresolved, or it is too early to know.          |
+| `outdated`           | The claim can be established for an earlier time but is no longer true as framed now; specify both times.             |
+| `not_fact_checkable` | A pure value judgment, operationally vague assertion, or prediction without an observable present fact.               |
 
 If atomic claims within one original statement have different outcomes, show them side by side rather than compressing them into one true/false label. `misleading` and `outdated` are not weaker forms of falsehood; explain the mechanism and relevant dates. `unverified` is not `contradicted`. Assign confidence separately as `high | medium | low`, with reasons covering key-claim coverage, primary material and independent clusters, reproducibility, conflicts, search coverage, and recent change. Confidence is confidence in this assessment, not the probability that the user's statement is true. If the record cannot support a directional verdict, use `unverified` even if many pages repeat the same source.
 

@@ -20,20 +20,20 @@
     "verificationMode"
   ],
   "properties": {
-    "methodologyVersion": {"const": "0.3"},
+    "methodologyVersion": { "const": "0.3" },
     "input": {
       "type": "object",
       "additionalProperties": false,
       "required": ["mode", "textScope", "accessStatus", "language"],
       "properties": {
-        "mode": {"enum": ["claim", "article"]},
-        "textScope": {"type": "string", "minLength": 1},
-        "url": {"type": ["string", "null"], "format": "uri"},
-        "accessStatus": {"enum": ["full", "partial", "unavailable"]},
-        "language": {"type": "string", "minLength": 1}
+        "mode": { "enum": ["claim", "article"] },
+        "textScope": { "type": "string", "minLength": 1 },
+        "url": { "type": ["string", "null"], "format": "uri" },
+        "accessStatus": { "enum": ["full", "partial", "unavailable"] },
+        "language": { "type": "string", "minLength": 1 }
       }
     },
-    "checkedAt": {"type": "string", "format": "date-time", "minLength": 1},
+    "checkedAt": { "type": "string", "format": "date-time", "minLength": 1 },
     "passages": {
       "type": "array",
       "items": {
@@ -41,11 +41,25 @@
         "additionalProperties": false,
         "required": ["id", "location", "excerpt", "attribution", "claimIds"],
         "properties": {
-          "id": {"type": "string", "minLength": 1},
-          "location": {"type": "string", "minLength": 1},
-          "excerpt": {"type": "string", "minLength": 1},
-          "attribution": {"enum": ["author", "quoted", "denied", "hypothetical", "question", "satire", "uncertain"]},
-          "claimIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+          "id": { "type": "string", "minLength": 1 },
+          "location": { "type": "string", "minLength": 1 },
+          "excerpt": { "type": "string", "minLength": 1 },
+          "attribution": {
+            "enum": [
+              "author",
+              "quoted",
+              "denied",
+              "hypothetical",
+              "question",
+              "satire",
+              "uncertain"
+            ]
+          },
+          "claimIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          }
         }
       }
     },
@@ -54,13 +68,30 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "normalizedText", "category", "status", "verdict", "confidence", "evidenceIds", "reason"],
+        "required": [
+          "id",
+          "normalizedText",
+          "category",
+          "status",
+          "verdict",
+          "confidence",
+          "evidenceIds",
+          "reason"
+        ],
         "properties": {
-          "id": {"type": "string", "minLength": 1},
-          "parentClaimId": {"type": ["string", "null"]},
-          "normalizedText": {"type": "string", "minLength": 1},
-          "category": {"enum": ["checkable", "opinion", "prediction", "ambiguous", "not_claim"]},
-          "status": {"enum": ["checked", "not_checked", "not_checkable"]},
+          "id": { "type": "string", "minLength": 1 },
+          "parentClaimId": { "type": ["string", "null"] },
+          "normalizedText": { "type": "string", "minLength": 1 },
+          "category": {
+            "enum": [
+              "checkable",
+              "opinion",
+              "prediction",
+              "ambiguous",
+              "not_claim"
+            ]
+          },
+          "status": { "enum": ["checked", "not_checked", "not_checkable"] },
           "verdict": {
             "enum": [
               "supported",
@@ -77,10 +108,17 @@
             "type": ["object", "null"],
             "additionalProperties": false,
             "required": ["level", "reason"],
-            "properties": {"level": {"enum": ["high", "medium", "low"]}, "reason": {"type": "string", "minLength": 1}}
+            "properties": {
+              "level": { "enum": ["high", "medium", "low"] },
+              "reason": { "type": "string", "minLength": 1 }
+            }
           },
-          "evidenceIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-          "reason": {"type": "string", "minLength": 1},
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
+          "reason": { "type": "string", "minLength": 1 },
           "verification": {
             "type": "object",
             "additionalProperties": false,
@@ -91,18 +129,32 @@
                 "items": {
                   "type": "object",
                   "additionalProperties": false,
-                  "required": ["id", "text", "status", "evidenceIds", "queryIds"],
+                  "required": [
+                    "id",
+                    "text",
+                    "status",
+                    "evidenceIds",
+                    "queryIds"
+                  ],
                   "properties": {
-                    "id": {"type": "string", "minLength": 1},
-                    "text": {"type": "string", "minLength": 1},
-                    "status": {"enum": ["resolved", "unresolved"]},
-                    "evidenceIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-                    "queryIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+                    "id": { "type": "string", "minLength": 1 },
+                    "text": { "type": "string", "minLength": 1 },
+                    "status": { "enum": ["resolved", "unresolved"] },
+                    "evidenceIds": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 },
+                      "uniqueItems": true
+                    },
+                    "queryIds": {
+                      "type": "array",
+                      "items": { "type": "string", "minLength": 1 },
+                      "uniqueItems": true
+                    }
                   }
                 },
                 "minItems": 1
               },
-              "rounds": {"type": "integer", "minimum": 0},
+              "rounds": { "type": "integer", "minimum": 0 },
               "stopReason": {
                 "enum": [
                   "evidence_sufficient",
@@ -112,7 +164,11 @@
                   "tool_unavailable"
                 ]
               },
-              "remainingGaps": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 0}
+              "remainingGaps": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "minItems": 0
+              }
             }
           },
           "suggestedCorrection": {
@@ -120,10 +176,16 @@
             "additionalProperties": false,
             "required": ["text", "reason", "evidenceIds", "changeKind"],
             "properties": {
-              "text": {"type": "string", "minLength": 1},
-              "reason": {"type": "string", "minLength": 1},
-              "evidenceIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-              "changeKind": {"enum": ["correct", "qualify", "update", "withhold"]}
+              "text": { "type": "string", "minLength": 1 },
+              "reason": { "type": "string", "minLength": 1 },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
+              },
+              "changeKind": {
+                "enum": ["correct", "qualify", "update", "withhold"]
+              }
             }
           },
           "historyMatches": {
@@ -131,12 +193,19 @@
             "items": {
               "type": "object",
               "additionalProperties": false,
-              "required": ["reportId", "claimId", "contextComparison", "action"],
+              "required": [
+                "reportId",
+                "claimId",
+                "contextComparison",
+                "action"
+              ],
               "properties": {
-                "reportId": {"type": "string", "minLength": 1},
-                "claimId": {"type": "string", "minLength": 1},
-                "contextComparison": {"type": "string", "minLength": 1},
-                "action": {"enum": ["reuse_after_recheck", "recheck", "reject"]}
+                "reportId": { "type": "string", "minLength": 1 },
+                "claimId": { "type": "string", "minLength": 1 },
+                "contextComparison": { "type": "string", "minLength": 1 },
+                "action": {
+                  "enum": ["reuse_after_recheck", "recheck", "reject"]
+                }
               }
             },
             "minItems": 0
@@ -144,9 +213,16 @@
         },
         "allOf": [
           {
-            "if": {"properties": {"status": {"const": "checked"}}},
-            "then": {"required": ["verification"]},
-            "else": {"not": {"anyOf": [{"required": ["verification"]}, {"required": ["suggestedCorrection"]}]}}
+            "if": { "properties": { "status": { "const": "checked" } } },
+            "then": { "required": ["verification"] },
+            "else": {
+              "not": {
+                "anyOf": [
+                  { "required": ["verification"] },
+                  { "required": ["suggestedCorrection"] }
+                ]
+              }
+            }
           }
         ]
       }
@@ -156,24 +232,45 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "publisher", "accessStatus", "retrievedAt", "sourceType", "derivedFrom"],
+        "required": [
+          "id",
+          "publisher",
+          "accessStatus",
+          "retrievedAt",
+          "sourceType",
+          "derivedFrom"
+        ],
         "properties": {
-          "id": {"type": "string", "minLength": 1},
-          "url": {"type": ["string", "null"], "format": "uri"},
-          "publisher": {"type": "string", "minLength": 1},
-          "author": {"type": ["string", "null"]},
-          "publishedAt": {"type": ["string", "null"], "format": "date-time"},
-          "retrievedAt": {"type": "string", "format": "date-time", "minLength": 1},
-          "accessStatus": {"enum": ["full", "partial", "unavailable"]},
-          "sourceType": {"enum": ["primary", "secondary", "social", "database", "unknown"]},
-          "derivedFrom": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+          "id": { "type": "string", "minLength": 1 },
+          "url": { "type": ["string", "null"], "format": "uri" },
+          "publisher": { "type": "string", "minLength": 1 },
+          "author": { "type": ["string", "null"] },
+          "publishedAt": { "type": ["string", "null"], "format": "date-time" },
+          "retrievedAt": {
+            "type": "string",
+            "format": "date-time",
+            "minLength": 1
+          },
+          "accessStatus": { "enum": ["full", "partial", "unavailable"] },
+          "sourceType": {
+            "enum": ["primary", "secondary", "social", "database", "unknown"]
+          },
+          "derivedFrom": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 },
+            "uniqueItems": true
+          },
           "snapshot": {
             "type": "object",
             "additionalProperties": false,
             "required": ["artifactPath", "sha256"],
             "properties": {
-              "artifactPath": {"type": "string", "minLength": 1},
-              "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$", "minLength": 1}
+              "artifactPath": { "type": "string", "minLength": 1 },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$",
+                "minLength": 1
+              }
             }
           }
         }
@@ -201,29 +298,31 @@
           "directness"
         ],
         "properties": {
-          "id": {"type": "string", "minLength": 1},
-          "claimId": {"type": "string", "minLength": 1},
-          "sourceId": {"type": "string", "minLength": 1},
-          "locator": {"type": "string", "minLength": 1},
-          "excerptOrSummary": {"type": "string", "minLength": 1},
-          "stance": {"enum": ["supports", "contradicts", "context", "unclear"]},
-          "quality": {"enum": ["high", "medium", "low", "unknown"]},
-          "qualityReason": {"type": "string", "minLength": 1},
-          "clusterId": {"type": ["string", "null"]},
-          "independence": {"enum": ["independent", "derived", "unknown"]},
-          "contentKind": {"enum": ["quote", "summary"]},
-          "language": {"type": ["string", "null"], "minLength": 1},
+          "id": { "type": "string", "minLength": 1 },
+          "claimId": { "type": "string", "minLength": 1 },
+          "sourceId": { "type": "string", "minLength": 1 },
+          "locator": { "type": "string", "minLength": 1 },
+          "excerptOrSummary": { "type": "string", "minLength": 1 },
+          "stance": {
+            "enum": ["supports", "contradicts", "context", "unclear"]
+          },
+          "quality": { "enum": ["high", "medium", "low", "unknown"] },
+          "qualityReason": { "type": "string", "minLength": 1 },
+          "clusterId": { "type": ["string", "null"] },
+          "independence": { "enum": ["independent", "derived", "unknown"] },
+          "contentKind": { "enum": ["quote", "summary"] },
+          "language": { "type": ["string", "null"], "minLength": 1 },
           "applicability": {
             "type": "object",
             "additionalProperties": false,
             "required": ["period", "region", "population"],
             "properties": {
-              "period": {"type": ["string", "null"], "minLength": 1},
-              "region": {"type": ["string", "null"], "minLength": 1},
-              "population": {"type": ["string", "null"], "minLength": 1}
+              "period": { "type": ["string", "null"], "minLength": 1 },
+              "region": { "type": ["string", "null"], "minLength": 1 },
+              "population": { "type": ["string", "null"], "minLength": 1 }
             }
           },
-          "directness": {"enum": ["direct", "indirect", "unknown"]}
+          "directness": { "enum": ["direct", "indirect", "unknown"] }
         }
       }
     },
@@ -243,14 +342,33 @@
           "potentialIssues"
         ],
         "properties": {
-          "sourceId": {"type": "string", "minLength": 1},
-          "claimId": {"type": "string", "minLength": 1},
-          "premises": {"type": "array", "items": {"type": "string", "minLength": 1}},
-          "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}},
-          "inference": {"type": "string", "minLength": 1},
-          "conclusion": {"type": "string", "minLength": 1},
-          "type": {"enum": ["deductive", "inductive", "abductive", "statistical", "causal", "analogical", "other"]},
-          "potentialIssues": {"type": "array", "items": {"type": "string", "minLength": 1}}
+          "sourceId": { "type": "string", "minLength": 1 },
+          "claimId": { "type": "string", "minLength": 1 },
+          "premises": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "assumptions": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "inference": { "type": "string", "minLength": 1 },
+          "conclusion": { "type": "string", "minLength": 1 },
+          "type": {
+            "enum": [
+              "deductive",
+              "inductive",
+              "abductive",
+              "statistical",
+              "causal",
+              "analogical",
+              "other"
+            ]
+          },
+          "potentialIssues": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          }
         }
       }
     },
@@ -258,7 +376,10 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["earliestVisibleSourceId", "caveat"],
-      "properties": {"earliestVisibleSourceId": {"type": ["string", "null"]}, "caveat": {"type": "string", "minLength": 1}}
+      "properties": {
+        "earliestVisibleSourceId": { "type": ["string", "null"] },
+        "caveat": { "type": "string", "minLength": 1 }
+      }
     },
     "articleAssessment": {
       "type": "object",
@@ -272,12 +393,15 @@
         "summary"
       ],
       "properties": {
-        "candidateCheckableCount": {"type": "integer", "minimum": 0},
-        "checkedCount": {"type": "integer", "minimum": 0},
-        "selectionReason": {"type": "string", "minLength": 1},
-        "unexamined": {"type": "array", "items": {"type": "string", "minLength": 1}},
-        "headlineAssessment": {"type": "string", "minLength": 1},
-        "summary": {"type": "string", "minLength": 1}
+        "candidateCheckableCount": { "type": "integer", "minimum": 0 },
+        "checkedCount": { "type": "integer", "minimum": 0 },
+        "selectionReason": { "type": "string", "minLength": 1 },
+        "unexamined": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "headlineAssessment": { "type": "string", "minLength": 1 },
+        "summary": { "type": "string", "minLength": 1 }
       }
     },
     "audit": {
@@ -285,34 +409,67 @@
       "additionalProperties": false,
       "required": ["onlineChecked", "queries", "finalReview"],
       "properties": {
-        "onlineChecked": {"type": "boolean"},
+        "onlineChecked": { "type": "boolean" },
         "queries": {
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["text", "purpose", "searchedAt", "id", "claimId", "round", "outcome", "sourceIds"],
+            "required": [
+              "text",
+              "purpose",
+              "searchedAt",
+              "id",
+              "claimId",
+              "round",
+              "outcome",
+              "sourceIds"
+            ],
             "properties": {
-              "text": {"type": "string", "minLength": 1},
-              "purpose": {"enum": ["support", "counter", "neutral", "primary", "origin", "multilingual"]},
-              "searchedAt": {"type": "string", "format": "date-time", "minLength": 1},
-              "id": {"type": "string", "minLength": 1},
-              "claimId": {"type": "string", "minLength": 1},
-              "round": {"type": "integer", "minimum": 1},
-              "outcome": {"enum": ["success", "no_results", "error"]},
-              "sourceIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-              "note": {"type": "string", "minLength": 1}
+              "text": { "type": "string", "minLength": 1 },
+              "purpose": {
+                "enum": [
+                  "support",
+                  "counter",
+                  "neutral",
+                  "primary",
+                  "origin",
+                  "multilingual"
+                ]
+              },
+              "searchedAt": {
+                "type": "string",
+                "format": "date-time",
+                "minLength": 1
+              },
+              "id": { "type": "string", "minLength": 1 },
+              "claimId": { "type": "string", "minLength": 1 },
+              "round": { "type": "integer", "minimum": 1 },
+              "outcome": { "enum": ["success", "no_results", "error"] },
+              "sourceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
+              },
+              "note": { "type": "string", "minLength": 1 }
             },
             "allOf": [
               {
-                "if": {"properties": {"outcome": {"enum": ["no_results", "error"]}}},
-                "then": {"properties": {"sourceIds": {"maxItems": 0}}}
+                "if": {
+                  "properties": {
+                    "outcome": { "enum": ["no_results", "error"] }
+                  }
+                },
+                "then": { "properties": { "sourceIds": { "maxItems": 0 } } }
               },
-              {"if": {"properties": {"outcome": {"const": "error"}}}, "then": {"required": ["note"]}}
+              {
+                "if": { "properties": { "outcome": { "const": "error" } } },
+                "then": { "required": ["note"] }
+              }
             ]
           }
         },
-        "model": {"type": ["string", "null"], "minLength": 1},
+        "model": { "type": ["string", "null"], "minLength": 1 },
         "tools": {
           "type": "array",
           "items": {
@@ -320,8 +477,8 @@
             "additionalProperties": false,
             "required": ["name", "version"],
             "properties": {
-              "name": {"type": "string", "minLength": 1},
-              "version": {"type": ["string", "null"], "minLength": 1}
+              "name": { "type": "string", "minLength": 1 },
+              "version": { "type": ["string", "null"], "minLength": 1 }
             }
           },
           "minItems": 0
@@ -331,21 +488,28 @@
           "additionalProperties": false,
           "required": ["status", "checkedClaimIds", "summaryChecked", "notes"],
           "properties": {
-            "status": {"enum": ["complete", "incomplete"]},
-            "checkedClaimIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-            "summaryChecked": {"type": "boolean"},
-            "notes": {"type": "string", "minLength": 1}
+            "status": { "enum": ["complete", "incomplete"] },
+            "checkedClaimIds": {
+              "type": "array",
+              "items": { "type": "string", "minLength": 1 },
+              "uniqueItems": true
+            },
+            "summaryChecked": { "type": "boolean" },
+            "notes": { "type": "string", "minLength": 1 }
           }
         }
       }
     },
-    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "limitations": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 }
+    },
     "persuasionAnalysis": {
       "type": "object",
       "additionalProperties": false,
       "required": ["basis", "techniques", "communicativeFunction", "limits"],
       "properties": {
-        "basis": {"type": "string", "minLength": 1},
+        "basis": { "type": "string", "minLength": 1 },
         "techniques": {
           "type": "array",
           "minItems": 1,
@@ -361,37 +525,50 @@
               "relatedClaimIds"
             ],
             "properties": {
-              "passageId": {"type": "string", "minLength": 1},
-              "linguisticCue": {"type": "string", "minLength": 1},
-              "technique": {"type": "string", "minLength": 1},
-              "possiblePsychologicalMechanism": {"type": "string", "minLength": 1},
-              "possibleSharingEffect": {"type": "string", "minLength": 1},
-              "relatedClaimIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+              "passageId": { "type": "string", "minLength": 1 },
+              "linguisticCue": { "type": "string", "minLength": 1 },
+              "technique": { "type": "string", "minLength": 1 },
+              "possiblePsychologicalMechanism": {
+                "type": "string",
+                "minLength": 1
+              },
+              "possibleSharingEffect": { "type": "string", "minLength": 1 },
+              "relatedClaimIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
+              }
             }
           }
         },
-        "communicativeFunction": {"type": "string", "minLength": 1},
-        "limits": {"type": "string", "minLength": 1}
+        "communicativeFunction": { "type": "string", "minLength": 1 },
+        "limits": { "type": "string", "minLength": 1 }
       }
     },
-    "closingSummary": {"type": "string", "minLength": 1},
-    "reportId": {"type": "string", "minLength": 1},
-    "verificationMode": {"enum": ["quick", "standard", "deep"]},
+    "closingSummary": { "type": "string", "minLength": 1 },
+    "reportId": { "type": "string", "minLength": 1 },
+    "verificationMode": { "enum": ["quick", "standard", "deep"] },
     "revision": {
       "type": "object",
       "additionalProperties": false,
       "required": ["previousReportId", "reason", "changes"],
       "properties": {
-        "previousReportId": {"type": "string", "minLength": 1},
-        "reason": {"type": "string", "minLength": 1},
+        "previousReportId": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
         "changes": {
           "type": "array",
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["claimId", "previousVerdict", "newVerdict", "reason", "evidenceIds"],
+            "required": [
+              "claimId",
+              "previousVerdict",
+              "newVerdict",
+              "reason",
+              "evidenceIds"
+            ],
             "properties": {
-              "claimId": {"type": "string", "minLength": 1},
+              "claimId": { "type": "string", "minLength": 1 },
               "previousVerdict": {
                 "enum": [
                   "supported",
@@ -416,8 +593,12 @@
                   null
                 ]
               },
-              "reason": {"type": "string", "minLength": 1},
-              "evidenceIds": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+              "reason": { "type": "string", "minLength": 1 },
+              "evidenceIds": {
+                "type": "array",
+                "items": { "type": "string", "minLength": 1 },
+                "uniqueItems": true
+              }
             }
           },
           "minItems": 0
@@ -427,12 +608,20 @@
   },
   "allOf": [
     {
-      "if": {"properties": {"input": {"properties": {"mode": {"const": "article"}}}}},
-      "then": {"required": ["articleAssessment"]}
+      "if": {
+        "properties": {
+          "input": { "properties": { "mode": { "const": "article" } } }
+        }
+      },
+      "then": { "required": ["articleAssessment"] }
     },
     {
-      "if": {"properties": {"input": {"properties": {"mode": {"const": "claim"}}}}},
-      "then": {"not": {"required": ["articleAssessment"]}}
+      "if": {
+        "properties": {
+          "input": { "properties": { "mode": { "const": "claim" } } }
+        }
+      },
+      "then": { "not": { "required": ["articleAssessment"] } }
     },
     {
       "properties": {
@@ -440,7 +629,7 @@
           "items": {
             "allOf": [
               {
-                "if": {"properties": {"status": {"const": "checked"}}},
+                "if": { "properties": { "status": { "const": "checked" } } },
                 "then": {
                   "properties": {
                     "verdict": {
@@ -453,17 +642,31 @@
                         "outdated"
                       ]
                     },
-                    "confidence": {"type": "object"}
+                    "confidence": { "type": "object" }
                   }
                 }
               },
               {
-                "if": {"properties": {"status": {"const": "not_checked"}}},
-                "then": {"properties": {"verdict": {"type": "null"}, "confidence": {"type": "null"}}}
+                "if": {
+                  "properties": { "status": { "const": "not_checked" } }
+                },
+                "then": {
+                  "properties": {
+                    "verdict": { "type": "null" },
+                    "confidence": { "type": "null" }
+                  }
+                }
               },
               {
-                "if": {"properties": {"status": {"const": "not_checkable"}}},
-                "then": {"properties": {"verdict": {"const": "not_fact_checkable"}, "confidence": {"type": "null"}}}
+                "if": {
+                  "properties": { "status": { "const": "not_checkable" } }
+                },
+                "then": {
+                  "properties": {
+                    "verdict": { "const": "not_fact_checkable" },
+                    "confidence": { "type": "null" }
+                  }
+                }
               }
             ]
           }

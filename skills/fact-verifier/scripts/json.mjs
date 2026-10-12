@@ -18,7 +18,9 @@ function isRecord(value) {
 function parseJson(text) {
   const value = JSON.parse(text);
   // JSON.parse validates syntax first; this walk checks information it discards.
-  const tokens = text.match(/"(?:[^"\\]|\\[\s\S])*"|[{}\[\]:,]|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null/g);
+  const tokens = text.match(
+    /"(?:[^"\\]|\\[\s\S])*"|[{}\[\]:,]|-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?|true|false|null/g,
+  );
   let offset = 0;
 
   /** Inspect one value in an already syntactically valid token stream. */
@@ -28,7 +30,8 @@ function parseJson(text) {
       const keys = new Set();
       while (tokens[offset] !== '}') {
         const key = JSON.parse(tokens[offset++]);
-        if (keys.has(key)) throw new SyntaxError(`Duplicate JSON member: ${key}`);
+        if (keys.has(key))
+          throw new SyntaxError(`Duplicate JSON member: ${key}`);
         keys.add(key);
         offset++; // Colon.
         inspect();

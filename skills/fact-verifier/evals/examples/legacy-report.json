@@ -12,9 +12,7 @@
       "location": "input sentence 1",
       "excerpt": "The fictional Northbridge tower is 42 metres tall.",
       "attribution": "author",
-      "claimIds": [
-        "C1"
-      ]
+      "claimIds": ["C1"]
     }
   ],
   "claims": [
@@ -28,9 +26,7 @@
         "level": "medium",
         "reason": "Synthetic primary record; no independent corroboration in this fixture."
       },
-      "evidenceIds": [
-        "E1"
-      ],
+      "evidenceIds": ["E1"],
       "reason": "The provided fictional record states 42 metres."
     }
   ],

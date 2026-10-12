@@ -4,21 +4,33 @@
   "title": "Fact verification report v0.2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["methodologyVersion", "input", "checkedAt", "passages", "claims", "sources", "evidence", "arguments", "audit", "limitations", "closingSummary"],
+  "required": [
+    "methodologyVersion",
+    "input",
+    "checkedAt",
+    "passages",
+    "claims",
+    "sources",
+    "evidence",
+    "arguments",
+    "audit",
+    "limitations",
+    "closingSummary"
+  ],
   "properties": {
-    "methodologyVersion": {"const": "0.2"},
+    "methodologyVersion": { "const": "0.2" },
     "input": {
       "type": "object",
       "additionalProperties": false,
       "required": ["mode", "textScope", "accessStatus"],
       "properties": {
-        "mode": {"enum": ["claim", "article"]},
-        "textScope": {"type": "string", "minLength": 1},
-        "url": {"type": ["string", "null"], "format": "uri"},
-        "accessStatus": {"enum": ["full", "partial", "unavailable"]}
+        "mode": { "enum": ["claim", "article"] },
+        "textScope": { "type": "string", "minLength": 1 },
+        "url": { "type": ["string", "null"], "format": "uri" },
+        "accessStatus": { "enum": ["full", "partial", "unavailable"] }
       }
     },
-    "checkedAt": {"type": "string", "format": "date-time"},
+    "checkedAt": { "type": "string", "format": "date-time" },
     "passages": {
       "type": "array",
       "items": {
@@ -26,11 +38,25 @@
         "additionalProperties": false,
         "required": ["id", "location", "excerpt", "attribution", "claimIds"],
         "properties": {
-          "id": {"type": "string"},
-          "location": {"type": "string"},
-          "excerpt": {"type": "string"},
-          "attribution": {"enum": ["author", "quoted", "denied", "hypothetical", "question", "satire", "uncertain"]},
-          "claimIds": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+          "id": { "type": "string" },
+          "location": { "type": "string" },
+          "excerpt": { "type": "string" },
+          "attribution": {
+            "enum": [
+              "author",
+              "quoted",
+              "denied",
+              "hypothetical",
+              "question",
+              "satire",
+              "uncertain"
+            ]
+          },
+          "claimIds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          }
         }
       }
     },
@@ -39,25 +65,57 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "normalizedText", "category", "status", "verdict", "confidence", "evidenceIds", "reason"],
+        "required": [
+          "id",
+          "normalizedText",
+          "category",
+          "status",
+          "verdict",
+          "confidence",
+          "evidenceIds",
+          "reason"
+        ],
         "properties": {
-          "id": {"type": "string"},
-          "parentClaimId": {"type": ["string", "null"]},
-          "normalizedText": {"type": "string"},
-          "category": {"enum": ["checkable", "opinion", "prediction", "ambiguous", "not_claim"]},
-          "status": {"enum": ["checked", "not_checked", "not_checkable"]},
-          "verdict": {"enum": ["supported", "mostly_supported", "misleading", "contradicted", "unverified", "outdated", "not_fact_checkable", null]},
+          "id": { "type": "string" },
+          "parentClaimId": { "type": ["string", "null"] },
+          "normalizedText": { "type": "string" },
+          "category": {
+            "enum": [
+              "checkable",
+              "opinion",
+              "prediction",
+              "ambiguous",
+              "not_claim"
+            ]
+          },
+          "status": { "enum": ["checked", "not_checked", "not_checkable"] },
+          "verdict": {
+            "enum": [
+              "supported",
+              "mostly_supported",
+              "misleading",
+              "contradicted",
+              "unverified",
+              "outdated",
+              "not_fact_checkable",
+              null
+            ]
+          },
           "confidence": {
             "type": ["object", "null"],
             "additionalProperties": false,
             "required": ["level", "reason"],
             "properties": {
-              "level": {"enum": ["high", "medium", "low"]},
-              "reason": {"type": "string"}
+              "level": { "enum": ["high", "medium", "low"] },
+              "reason": { "type": "string" }
             }
           },
-          "evidenceIds": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
-          "reason": {"type": "string"}
+          "evidenceIds": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          },
+          "reason": { "type": "string" }
         }
       }
     },
@@ -66,17 +124,30 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "publisher", "accessStatus", "retrievedAt", "sourceType", "derivedFrom"],
+        "required": [
+          "id",
+          "publisher",
+          "accessStatus",
+          "retrievedAt",
+          "sourceType",
+          "derivedFrom"
+        ],
         "properties": {
-          "id": {"type": "string"},
-          "url": {"type": ["string", "null"], "format": "uri"},
-          "publisher": {"type": "string"},
-          "author": {"type": ["string", "null"]},
-          "publishedAt": {"type": ["string", "null"], "format": "date-time"},
-          "retrievedAt": {"type": "string", "format": "date-time"},
-          "accessStatus": {"enum": ["full", "partial", "unavailable"]},
-          "sourceType": {"enum": ["primary", "secondary", "social", "database", "unknown"]},
-          "derivedFrom": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+          "id": { "type": "string" },
+          "url": { "type": ["string", "null"], "format": "uri" },
+          "publisher": { "type": "string" },
+          "author": { "type": ["string", "null"] },
+          "publishedAt": { "type": ["string", "null"], "format": "date-time" },
+          "retrievedAt": { "type": "string", "format": "date-time" },
+          "accessStatus": { "enum": ["full", "partial", "unavailable"] },
+          "sourceType": {
+            "enum": ["primary", "secondary", "social", "database", "unknown"]
+          },
+          "derivedFrom": {
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true
+          }
         }
       }
     },
@@ -85,18 +156,31 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["id", "claimId", "sourceId", "locator", "excerptOrSummary", "stance", "quality", "qualityReason", "clusterId", "independence"],
+        "required": [
+          "id",
+          "claimId",
+          "sourceId",
+          "locator",
+          "excerptOrSummary",
+          "stance",
+          "quality",
+          "qualityReason",
+          "clusterId",
+          "independence"
+        ],
         "properties": {
-          "id": {"type": "string"},
-          "claimId": {"type": "string"},
-          "sourceId": {"type": "string"},
-          "locator": {"type": "string"},
-          "excerptOrSummary": {"type": "string"},
-          "stance": {"enum": ["supports", "contradicts", "context", "unclear"]},
-          "quality": {"enum": ["high", "medium", "low", "unknown"]},
-          "qualityReason": {"type": "string"},
-          "clusterId": {"type": ["string", "null"]},
-          "independence": {"enum": ["independent", "derived", "unknown"]}
+          "id": { "type": "string" },
+          "claimId": { "type": "string" },
+          "sourceId": { "type": "string" },
+          "locator": { "type": "string" },
+          "excerptOrSummary": { "type": "string" },
+          "stance": {
+            "enum": ["supports", "contradicts", "context", "unclear"]
+          },
+          "quality": { "enum": ["high", "medium", "low", "unknown"] },
+          "qualityReason": { "type": "string" },
+          "clusterId": { "type": ["string", "null"] },
+          "independence": { "enum": ["independent", "derived", "unknown"] }
         }
       }
     },
@@ -105,16 +189,35 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["sourceId", "claimId", "premises", "assumptions", "inference", "conclusion", "type", "potentialIssues"],
+        "required": [
+          "sourceId",
+          "claimId",
+          "premises",
+          "assumptions",
+          "inference",
+          "conclusion",
+          "type",
+          "potentialIssues"
+        ],
         "properties": {
-          "sourceId": {"type": "string"},
-          "claimId": {"type": "string"},
-          "premises": {"type": "array", "items": {"type": "string"}},
-          "assumptions": {"type": "array", "items": {"type": "string"}},
-          "inference": {"type": "string"},
-          "conclusion": {"type": "string"},
-          "type": {"enum": ["deductive", "inductive", "abductive", "statistical", "causal", "analogical", "other"]},
-          "potentialIssues": {"type": "array", "items": {"type": "string"}}
+          "sourceId": { "type": "string" },
+          "claimId": { "type": "string" },
+          "premises": { "type": "array", "items": { "type": "string" } },
+          "assumptions": { "type": "array", "items": { "type": "string" } },
+          "inference": { "type": "string" },
+          "conclusion": { "type": "string" },
+          "type": {
+            "enum": [
+              "deductive",
+              "inductive",
+              "abductive",
+              "statistical",
+              "causal",
+              "analogical",
+              "other"
+            ]
+          },
+          "potentialIssues": { "type": "array", "items": { "type": "string" } }
         }
       }
     },
@@ -123,21 +226,28 @@
       "additionalProperties": false,
       "required": ["earliestVisibleSourceId", "caveat"],
       "properties": {
-        "earliestVisibleSourceId": {"type": ["string", "null"]},
-        "caveat": {"type": "string"}
+        "earliestVisibleSourceId": { "type": ["string", "null"] },
+        "caveat": { "type": "string" }
       }
     },
     "articleAssessment": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["candidateCheckableCount", "checkedCount", "selectionReason", "unexamined", "headlineAssessment", "summary"],
+      "required": [
+        "candidateCheckableCount",
+        "checkedCount",
+        "selectionReason",
+        "unexamined",
+        "headlineAssessment",
+        "summary"
+      ],
       "properties": {
-        "candidateCheckableCount": {"type": "integer", "minimum": 0},
-        "checkedCount": {"type": "integer", "minimum": 0},
-        "selectionReason": {"type": "string"},
-        "unexamined": {"type": "array", "items": {"type": "string"}},
-        "headlineAssessment": {"type": "string"},
-        "summary": {"type": "string"}
+        "candidateCheckableCount": { "type": "integer", "minimum": 0 },
+        "checkedCount": { "type": "integer", "minimum": 0 },
+        "selectionReason": { "type": "string" },
+        "unexamined": { "type": "array", "items": { "type": "string" } },
+        "headlineAssessment": { "type": "string" },
+        "summary": { "type": "string" }
       }
     },
     "audit": {
@@ -145,7 +255,7 @@
       "additionalProperties": false,
       "required": ["onlineChecked", "queries"],
       "properties": {
-        "onlineChecked": {"type": "boolean"},
+        "onlineChecked": { "type": "boolean" },
         "queries": {
           "type": "array",
           "items": {
@@ -153,51 +263,130 @@
             "additionalProperties": false,
             "required": ["text", "purpose", "searchedAt"],
             "properties": {
-              "text": {"type": "string"},
-              "purpose": {"enum": ["support", "counter", "neutral", "primary", "origin", "multilingual"]},
-              "searchedAt": {"type": "string", "format": "date-time"}
+              "text": { "type": "string" },
+              "purpose": {
+                "enum": [
+                  "support",
+                  "counter",
+                  "neutral",
+                  "primary",
+                  "origin",
+                  "multilingual"
+                ]
+              },
+              "searchedAt": { "type": "string", "format": "date-time" }
             }
           }
         }
       }
     },
-    "limitations": {"type": "array", "items": {"type": "string"}},
+    "limitations": { "type": "array", "items": { "type": "string" } },
     "persuasionAnalysis": {
       "type": "object",
       "additionalProperties": false,
       "required": ["basis", "techniques", "communicativeFunction", "limits"],
       "properties": {
-        "basis": {"type": "string", "minLength": 1},
+        "basis": { "type": "string", "minLength": 1 },
         "techniques": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["passageId", "linguisticCue", "technique", "possiblePsychologicalMechanism", "possibleSharingEffect", "relatedClaimIds"],
+            "required": [
+              "passageId",
+              "linguisticCue",
+              "technique",
+              "possiblePsychologicalMechanism",
+              "possibleSharingEffect",
+              "relatedClaimIds"
+            ],
             "properties": {
-              "passageId": {"type": "string"},
-              "linguisticCue": {"type": "string"},
-              "technique": {"type": "string"},
-              "possiblePsychologicalMechanism": {"type": "string"},
-              "possibleSharingEffect": {"type": "string"},
-              "relatedClaimIds": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+              "passageId": { "type": "string" },
+              "linguisticCue": { "type": "string" },
+              "technique": { "type": "string" },
+              "possiblePsychologicalMechanism": { "type": "string" },
+              "possibleSharingEffect": { "type": "string" },
+              "relatedClaimIds": {
+                "type": "array",
+                "items": { "type": "string" },
+                "uniqueItems": true
+              }
             }
           }
         },
-        "communicativeFunction": {"type": "string"},
-        "limits": {"type": "string"}
+        "communicativeFunction": { "type": "string" },
+        "limits": { "type": "string" }
       }
     },
-    "closingSummary": {"type": "string", "minLength": 1}
+    "closingSummary": { "type": "string", "minLength": 1 }
   },
   "allOf": [
-    {"if": {"properties": {"input": {"properties": {"mode": {"const": "article"}}}}}, "then": {"required": ["articleAssessment"]}},
-    {"if": {"properties": {"input": {"properties": {"mode": {"const": "claim"}}}}}, "then": {"not": {"required": ["articleAssessment"]}}},
-    {"properties": {"claims": {"items": {"allOf": [
-      {"if": {"properties": {"status": {"const": "checked"}}}, "then": {"properties": {"verdict": {"enum": ["supported", "mostly_supported", "misleading", "contradicted", "unverified", "outdated"]}, "confidence": {"type": "object"}}}},
-      {"if": {"properties": {"status": {"const": "not_checked"}}}, "then": {"properties": {"verdict": {"type": "null"}, "confidence": {"type": "null"}}}},
-      {"if": {"properties": {"status": {"const": "not_checkable"}}}, "then": {"properties": {"verdict": {"const": "not_fact_checkable"}, "confidence": {"type": "null"}}}}
-    ]}}}}
+    {
+      "if": {
+        "properties": {
+          "input": { "properties": { "mode": { "const": "article" } } }
+        }
+      },
+      "then": { "required": ["articleAssessment"] }
+    },
+    {
+      "if": {
+        "properties": {
+          "input": { "properties": { "mode": { "const": "claim" } } }
+        }
+      },
+      "then": { "not": { "required": ["articleAssessment"] } }
+    },
+    {
+      "properties": {
+        "claims": {
+          "items": {
+            "allOf": [
+              {
+                "if": { "properties": { "status": { "const": "checked" } } },
+                "then": {
+                  "properties": {
+                    "verdict": {
+                      "enum": [
+                        "supported",
+                        "mostly_supported",
+                        "misleading",
+                        "contradicted",
+                        "unverified",
+                        "outdated"
+                      ]
+                    },
+                    "confidence": { "type": "object" }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": { "status": { "const": "not_checked" } }
+                },
+                "then": {
+                  "properties": {
+                    "verdict": { "type": "null" },
+                    "confidence": { "type": "null" }
+                  }
+                }
+              },
+              {
+                "if": {
+                  "properties": { "status": { "const": "not_checkable" } }
+                },
+                "then": {
+                  "properties": {
+                    "verdict": { "const": "not_fact_checkable" },
+                    "confidence": { "type": "null" }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
   ]
 }

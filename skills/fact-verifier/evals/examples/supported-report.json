@@ -15,9 +15,7 @@
       "location": "input sentence 1",
       "excerpt": "The fictional Northbridge tower is 42 metres tall.",
       "attribution": "author",
-      "claimIds": [
-        "C1"
-      ]
+      "claimIds": ["C1"]
     }
   ],
   "claims": [
@@ -31,9 +29,7 @@
         "level": "medium",
         "reason": "Synthetic primary record; no independent corroboration in this fixture."
       },
-      "evidenceIds": [
-        "E1"
-      ],
+      "evidenceIds": ["E1"],
       "reason": "The provided fictional record states 42 metres.",
       "verification": {
         "questions": [
@@ -41,13 +37,8 @@
             "id": "C1.Q1",
             "text": "What height does the October 2026 tower register record?",
             "status": "resolved",
-            "evidenceIds": [
-              "E1"
-            ],
-            "queryIds": [
-              "Q1",
-              "Q2"
-            ]
+            "evidenceIds": ["E1"],
+            "queryIds": ["Q1", "Q2"]
           }
         ],
         "rounds": 2,
@@ -110,9 +101,7 @@
         "purpose": "primary",
         "searchedAt": "2026-10-12T13:50:00+08:00",
         "outcome": "success",
-        "sourceIds": [
-          "S1"
-        ],
+        "sourceIds": ["S1"],
         "note": "Simulated fixture search; no real website was accessed."
       },
       {
@@ -129,9 +118,7 @@
     ],
     "finalReview": {
       "status": "complete",
-      "checkedClaimIds": [
-        "C1"
-      ],
+      "checkedClaimIds": ["C1"],
       "summaryChecked": true,
       "notes": "Synthetic report reviewed for example consistency; not a live fact-check."
     }
