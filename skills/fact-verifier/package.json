@@ -1,0 +1,17 @@
+{
+  "name": "fact-verifier",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "node --test",
+    "validate": "node scripts/validate_report.mjs",
+    "evaluate": "node scripts/evaluate_cases.mjs"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  }
+}

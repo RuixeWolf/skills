@@ -1,0 +1,144 @@
+{
+  "methodologyVersion": "0.3",
+  "reportId": "synthetic-supported-001",
+  "verificationMode": "quick",
+  "input": {
+    "mode": "claim",
+    "language": "en",
+    "textScope": "SYNTHETIC FIXTURE: The fictional Northbridge tower is 42 metres tall.",
+    "accessStatus": "full"
+  },
+  "checkedAt": "2026-10-12T14:00:00+08:00",
+  "passages": [
+    {
+      "id": "P1",
+      "location": "input sentence 1",
+      "excerpt": "The fictional Northbridge tower is 42 metres tall.",
+      "attribution": "author",
+      "claimIds": [
+        "C1"
+      ]
+    }
+  ],
+  "claims": [
+    {
+      "id": "C1",
+      "normalizedText": "The fictional Northbridge tower is 42 metres tall in October 2026.",
+      "category": "checkable",
+      "status": "checked",
+      "verdict": "supported",
+      "confidence": {
+        "level": "medium",
+        "reason": "Synthetic primary record; no independent corroboration in this fixture."
+      },
+      "evidenceIds": [
+        "E1"
+      ],
+      "reason": "The provided fictional record states 42 metres.",
+      "verification": {
+        "questions": [
+          {
+            "id": "C1.Q1",
+            "text": "What height does the October 2026 tower register record?",
+            "status": "resolved",
+            "evidenceIds": [
+              "E1"
+            ],
+            "queryIds": [
+              "Q1",
+              "Q2"
+            ]
+          }
+        ],
+        "rounds": 2,
+        "stopReason": "evidence_sufficient",
+        "remainingGaps": []
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "S1",
+      "url": "https://northbridge.example.test/register",
+      "publisher": "Synthetic municipal register",
+      "author": null,
+      "publishedAt": "2026-10-01T09:00:00+08:00",
+      "retrievedAt": "2026-10-12T13:50:00+08:00",
+      "accessStatus": "full",
+      "sourceType": "primary",
+      "derivedFrom": []
+    }
+  ],
+  "evidence": [
+    {
+      "id": "E1",
+      "claimId": "C1",
+      "sourceId": "S1",
+      "locator": "Tower register, row 1",
+      "excerptOrSummary": "The Northbridge tower is 42 metres tall.",
+      "contentKind": "quote",
+      "language": "en",
+      "applicability": {
+        "period": "October 2026",
+        "region": "Fictional Northbridge",
+        "population": "The named tower"
+      },
+      "directness": "direct",
+      "stance": "supports",
+      "quality": "high",
+      "qualityReason": "The synthetic record directly states the relevant measurement.",
+      "clusterId": "tower-register",
+      "independence": "independent"
+    }
+  ],
+  "arguments": [],
+  "audit": {
+    "onlineChecked": true,
+    "model": null,
+    "tools": [
+      {
+        "name": "synthetic-search-fixture",
+        "version": "1"
+      }
+    ],
+    "queries": [
+      {
+        "id": "Q1",
+        "claimId": "C1",
+        "round": 1,
+        "text": "Northbridge tower height register October 2026",
+        "purpose": "primary",
+        "searchedAt": "2026-10-12T13:50:00+08:00",
+        "outcome": "success",
+        "sourceIds": [
+          "S1"
+        ],
+        "note": "Simulated fixture search; no real website was accessed."
+      },
+      {
+        "id": "Q2",
+        "claimId": "C1",
+        "round": 2,
+        "text": "Northbridge tower height correction dispute",
+        "purpose": "counter",
+        "searchedAt": "2026-10-12T13:55:00+08:00",
+        "outcome": "no_results",
+        "sourceIds": [],
+        "note": "Simulated empty countersearch."
+      }
+    ],
+    "finalReview": {
+      "status": "complete",
+      "checkedClaimIds": [
+        "C1"
+      ],
+      "summaryChecked": true,
+      "notes": "Synthetic report reviewed for example consistency; not a live fact-check."
+    }
+  },
+  "limitations": [
+    "Fictional source and simulated successful search history; this is a contract fixture, not a real verification.",
+    "One primary evidence cluster only."
+  ],
+  "closingSummary": "Synthetic example: C1 is supported by the provided fictional register; no other claims were checked and independent corroboration is absent."
+}

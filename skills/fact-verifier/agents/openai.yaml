@@ -1,0 +1,14 @@
+interface:
+  display_name: Evidence-Based Fact Verification
+  short_description: Verify claims in articles with traceable evidence and reasoning
+  default_prompt: Use $fact-verifier to verify the factual claims in the following
+    text with sources and reasoning.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

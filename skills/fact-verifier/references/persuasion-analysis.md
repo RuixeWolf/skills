@@ -1,0 +1,25 @@
+# Conditional Analysis of Persuasive Framing
+
+Use this section by default only when the two conditions in [methodology.md](methodology.md) are met: strong evidence contradicts or materially qualifies **multiple consequential claims** in the examined input, and the original text repeatedly or prominently appeals to emotion. An explicit user request can justify a neutral rhetoric analysis even without those conditions; then state clearly that rhetoric does not establish falsity. Read enough surrounding text to establish attribution. Quoting someone else's angry words does not automatically make the enclosing article emotionally manipulative.
+
+## From observable text to a limited inference
+
+For each important device, record (1) a short, locatable original excerpt or passage ID; (2) the precise linguistic cue; (3) any related verified claim ID and evidence status; (4) the plausible attention, emotion, or social-sharing mechanism; (5) a likely *communicative function*, phrased as a possibility; and (6) an alternative explanation or uncertainty. Distinguish “the text repeatedly asks readers to forward it” (observable) from “the author intended to deceive” (unproven). Avoid diagnosing the author or asserting how a particular audience actually reacted. Several devices may coexist; discuss only those clearly present.
+
+| Observable pattern | What to examine | Plausible communicative or sharing function |
+| --- | --- | --- |
+| Fear, anger, disgust, or moral outrage cues | Loaded adjectives, vivid threats, condemnation, exclamation, frightening imagery | May increase salience and make sharing feel like a warning or moral response. |
+| In-group/out-group framing or scapegoating | Pronouns, labels, collective blame, unqualified references to a group | May reinforce group identity and encourage within-group circulation. Do not equate criticism of an institution with scapegoating without a textual basis. |
+| Rhetorical questions and withheld “reveal” | Leading questions, suspense, a promised hidden answer | May invite readers to fill an evidential gap themselves and continue to the reveal. |
+| Implied causal chain or identity swap | Juxtaposed events or trade routes treated as proof of a covert outcome | May make an unsupported inference feel like an established discovery. Identify the missing causal or provenance link. |
+| Selective numbers or apparent precision | Large figures without denominators, currency, time frame, or source; incompatible metrics presented side by side | May create an appearance of authority and a simple, repeatable talking point. |
+| Urgency and direct sharing instruction | “Before it is deleted,” “tell everyone,” countdowns | May encourage forwarding before source checking. Distinguish an explicit call to share from a speculative effect. |
+| Repetition, slogans, and certainty markers | Repeated headline phrase, “everyone knows,” “undeniable proof” | May make the message memorable or suggest consensus; do not assert a measured psychological effect for this text. |
+
+Use ordinary words before specialist labels. Separate rhetorical analysis from [argument-analysis.md](argument-analysis.md): a false dichotomy can be both a reasoning issue and a framing technique, but its presence alone does not determine a claim's truth. Describe *how* the disputed fact or omitted context is carried by the framing.
+
+## Interpretation limits
+
+Research provides context for **possible** mechanisms, not proof of a particular author's goals or a prediction that a particular post went viral. An observational study associated moral-emotional language with diffusion in specific political social networks ([Brady et al., PNAS, 2017](https://doi.org/10.1073/pnas.1618923114)). Experiments examined recognition of emotional language, false dichotomies, scapegoating, and related techniques ([Roozenbeek et al., Science Advances, 2022](https://doi.org/10.1126/sciadv.abo6254)). Experimental work also suggests that drawing attention to accuracy can change sharing choices in some settings ([Pennycook et al., Nature, 2021](https://doi.org/10.1038/s41586-021-03344-2)). These findings do not justify a universal numerical effect, a clinical claim, or an inference that any specific author knowingly lied.
+
+When the conditions are met, title the section “Persuasive framing and possible spread mechanisms” (translated to the user's language). Explain the criteria briefly, give only the strongest passage-based examples, and end the section with the intent/outcome limitation. The report's overall “Analysis summary” must still appear last.
