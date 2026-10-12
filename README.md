@@ -34,19 +34,19 @@ Install skills using the `skills` CLI.
 ### Install a specific skill
 
 ```bash
-npx skills add RuixeWolf/agent-skills --skill jsdoc-generation
+npx skills add RuixeWolf/skills --skill jsdoc-generation
 ```
 
 ### Install globally
 
 ```bash
-npx skills add RuixeWolf/agent-skills --skill jsdoc-generation -g
+npx skills add RuixeWolf/skills --skill jsdoc-generation -g
 ```
 
 ### List available skills
 
 ```bash
-npx skills add RuixeWolf/agent-skills --list
+npx skills add RuixeWolf/skills --list
 ```
 
 As more skills are added, they can be installed individually using the same repository source and the corresponding skill name.
@@ -54,7 +54,7 @@ As more skills are added, they can be installed individually using the same repo
 ## Repository Structure
 
 ```text
-agent-skills/
+skills/
 ├── README.md
 └── skills/
     └── jsdoc-generation/

@@ -17,5 +17,5 @@ Enforces concise and consistent JSDoc standards for:
 ### Install
 
 ```bash
-npx skills add RuixeWolf/agent-skills --skill jsdoc-generation
+npx skills add RuixeWolf/skills --skill jsdoc-generation
 ```
