@@ -19,9 +19,9 @@ import {
   loadJson,
   parseJson,
   validateReport,
-} from '../scripts/validate_report.mjs';
+} from '../scripts/validate-report.mjs';
 /** Exercise evaluation fixtures and comparison independently of the CLI. */
-import { readRecords, compare } from '../scripts/evaluate_cases.mjs';
+import { readRecords, compare } from '../scripts/evaluate-cases.mjs';
 
 /** Absolute skill directory for tests launched from any location. */
 const ROOT = fileURLToPath(new URL('..', import.meta.url));
@@ -507,7 +507,7 @@ describe('Report validation', () => {
   test('validator CLI resolves schemas outside the skill directory', () => {
     withTempDirectory((directory) => {
       const run = runCli(
-        'validate_report.mjs',
+        'validate-report.mjs',
         [
           path.join(ROOT, 'evals/examples/supported-report.json'),
           '--source-texts',
@@ -524,25 +524,25 @@ describe('Report validation', () => {
 
   test('validator CLI distinguishes warnings, invalid reports, and unreadable input', () => {
     const filename = path.join(ROOT, 'evals/examples/supported-report.json');
-    const warning = runCli('validate_report.mjs', [
+    const warning = runCli('validate-report.mjs', [
       filename,
       '--strict',
       '--json',
     ]);
     assert.equal(warning.status, 1);
     assert.equal(JSON.parse(warning.stdout).valid, true);
-    assert.equal(runCli('validate_report.mjs', [filename]).status, 0);
+    assert.equal(runCli('validate-report.mjs', [filename]).status, 0);
     assert.equal(
-      runCli('validate_report.mjs', [`${filename}.missing`]).status,
+      runCli('validate-report.mjs', [`${filename}.missing`]).status,
       2,
     );
     withTempDirectory((directory) => {
       const input = path.join(directory, 'input.json');
       writeFileSync(input, '{"methodologyVersion":"9"}');
-      assert.equal(runCli('validate_report.mjs', [input]).status, 1);
+      assert.equal(runCli('validate-report.mjs', [input]).status, 1);
       for (const text of ['{"a":1,"a":2}', '{"a":NaN}', '{"a":1e999}', '{']) {
         writeFileSync(input, text);
-        assert.equal(runCli('validate_report.mjs', [input]).status, 2);
+        assert.equal(runCli('validate-report.mjs', [input]).status, 2);
       }
     });
   });
@@ -559,7 +559,7 @@ describe('Report validation', () => {
         changes: [],
       };
       writeFileSync(currentFile, JSON.stringify(report));
-      const run = runCli('validate_report.mjs', [
+      const run = runCli('validate-report.mjs', [
         currentFile,
         '--previous-report',
         previousFile,
@@ -714,16 +714,16 @@ describe('Evaluation comparison', () => {
           .map((record) => JSON.stringify(record))
           .join('\n'),
       );
-      const run = runCli('evaluate_cases.mjs', [filename], directory);
+      const run = runCli('evaluate-cases.mjs', [filename], directory);
       assert.equal(run.status, 0, run.stderr + run.stdout);
       assert.equal(JSON.parse(run.stdout).completeAgreement, true);
       const first = predictions.get('case-01');
       writeFileSync(filename, JSON.stringify(first));
-      assert.equal(runCli('evaluate_cases.mjs', [filename]).status, 1);
+      assert.equal(runCli('evaluate-cases.mjs', [filename]).status, 1);
       writeFileSync(customCases, JSON.stringify(cases.get('case-01')));
       assert.equal(
         runCli(
-          'evaluate_cases.mjs',
+          'evaluate-cases.mjs',
           [filename, '--cases', customCases],
           directory,
         ).status,
@@ -733,9 +733,9 @@ describe('Evaluation comparison', () => {
         filename,
         '{"caseId":"case-01","verdicts":{"C1":"true-ish"}}',
       );
-      assert.equal(runCli('evaluate_cases.mjs', [filename]).status, 2);
+      assert.equal(runCli('evaluate-cases.mjs', [filename]).status, 2);
       assert.equal(
-        runCli('evaluate_cases.mjs', [`${filename}.missing`]).status,
+        runCli('evaluate-cases.mjs', [`${filename}.missing`]).status,
         2,
       );
     });
@@ -743,7 +743,7 @@ describe('Evaluation comparison', () => {
 });
 
 describe('CLI usage', () => {
-  for (const script of ['validate_report.mjs', 'evaluate_cases.mjs']) {
+  for (const script of ['validate-report.mjs', 'evaluate-cases.mjs']) {
     test(`${script} reports usage errors and supports help`, () => {
       for (const args of [[], ['one', 'two'], ['--unknown'], ['--cases']]) {
         const run = runCli(script, args);

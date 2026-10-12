@@ -18,9 +18,9 @@ Node.js **24+** and npm are required only for the helper scripts. Run these comm
 
 ```bash
 npm ci
-node scripts/validate_report.mjs report.json
-node scripts/validate_report.mjs report.json --source-texts source-texts.json --json
-node scripts/validate_report.mjs revised.json --previous-report original.json --strict
+node scripts/validate-report.mjs report.json
+node scripts/validate-report.mjs report.json --source-texts source-texts.json --json
+node scripts/validate-report.mjs revised.json --previous-report original.json --strict
 npm test
 ```
 
@@ -29,7 +29,7 @@ npm test
 An executable **synthetic** example is included:
 
 ```bash
-node scripts/validate_report.mjs evals/examples/supported-report.json --source-texts evals/examples/source-texts.json --strict
+node scripts/validate-report.mjs evals/examples/supported-report.json --source-texts evals/examples/source-texts.json --strict
 ```
 
 Its source URLs and search history are fictional fixture data, not evidence of real online access.
@@ -55,7 +55,7 @@ Detailed instructions remain in [SKILL.md](SKILL.md), [methodology.md](reference
 Use [evals/rubric.md](evals/rubric.md) to run a blind agent evaluation and have a person review claim extraction, evidence fidelity, and uncertainty. To compare submitted case verdicts with the provisional expectations:
 
 ```bash
-node scripts/evaluate_cases.mjs predictions.jsonl
+node scripts/evaluate-cases.mjs predictions.jsonl
 ```
 
 Each prediction has `caseId`, `verdicts` (an object mapping expected claim IDs to verdicts), and optional `notes`. The script reports matches, disagreements, missing cases/claims and extra claims, with nonzero exit on disagreement or incomplete coverage. It does not score the free-text reasoning or certify the expectations. Never report these results as calibrated truth probabilities.

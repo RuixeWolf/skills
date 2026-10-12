@@ -1,9 +1,28 @@
 # Local agent-skill discovery links used while developing this repo.
-# These are junctions created on this machine (see README/notes) and must
-# not be committed: Git for Windows expands a junction into duplicated files.
+# `.agents/skills` is created by `npm run skills:link`; see the Development
+# section of README.md. Links must not be committed: Git for Windows expands a
+# junction into duplicated files.
 .agents/
 .claude/
 skills-lock.json
 
 # Installed npm dependencies (Prettier tooling and per-skill packages).
 node_modules/
+
+# Foreign package-manager lockfiles: this repository uses npm and commits only
+# package-lock.json. See the Development section of README.md.
+pnpm-lock.yaml
+yarn.lock
+
+# Temporary files created by the editor or operating system.
+*.swp
+*.swo
+*.tmp
+*.bak
+*.DS_Store
+*.log
+*.cache
+tmp/
+.tmp/
+temp/
+.temp/

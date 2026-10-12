@@ -7,8 +7,8 @@
   },
   "scripts": {
     "test": "node --test",
-    "validate": "node scripts/validate_report.mjs",
-    "evaluate": "node scripts/evaluate_cases.mjs"
+    "validate": "node scripts/validate-report.mjs",
+    "evaluate": "node scripts/evaluate-cases.mjs"
   },
   "dependencies": {
     "ajv": "^8.17.1",

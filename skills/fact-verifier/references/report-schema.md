@@ -39,9 +39,9 @@ With Node.js 24+, install dependencies from the skill directory. Then run there,
 
 ```bash
 npm ci
-node scripts/validate_report.mjs report.json
-node scripts/validate_report.mjs report.json --source-texts source-texts.json --json
-node scripts/validate_report.mjs revised.json --previous-report original.json --strict
+node scripts/validate-report.mjs report.json
+node scripts/validate-report.mjs report.json --source-texts source-texts.json --json
+node scripts/validate-report.mjs revised.json --previous-report original.json --strict
 ```
 
 `source-texts.json` is an object mapping source IDs to inspected full-text strings. The validator compares only `contentKind=quote`, preserving words, punctuation and numbers while normalizing Unicode NFC and whitespace. A summary is not a failed quotation. Missing comparison text produces a warning; a mismatching quote produces an error. Do not provide unrelated private source text.

@@ -27,7 +27,7 @@ Check:
 4. Repeated evidence has not become independent corroboration; unresolved conflicts and unavailable sources remain visible.
 5. Article counts and unchecked items agree, and persuasion analysis follows its separate trigger.
 
-Record `audit.finalReview` with reviewed checked-claim IDs, whether the summary was checked, status, and notes. Fix discovered errors before setting `status=complete`. An incomplete review can be saved as a draft but must be labeled incomplete. For a JSON deliverable, run `node scripts/validate_report.mjs`; interpret its warnings and correct actionable errors. Never silently auto-fill evidence or change a verdict to make validation pass.
+Record `audit.finalReview` with reviewed checked-claim IDs, whether the summary was checked, status, and notes. Fix discovered errors before setting `status=complete`. An incomplete review can be saved as a draft but must be labeled incomplete. For a JSON deliverable, run `node scripts/validate-report.mjs`; interpret its warnings and correct actionable errors. Never silently auto-fill evidence or change a verdict to make validation pass.
 
 ## Revisions
 

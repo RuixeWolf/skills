@@ -57,6 +57,99 @@ function readRecords(filename, idKey) {
   return records;
 }
 
+/** Validate verdicts from a submitted prediction before comparison. */
+function validatePrediction(caseId, prediction) {
+  const verdicts = prediction?.verdicts;
+  if (!isRecord(verdicts)) {
+    throw new Error(
+      `${caseId}: verdicts must map claim IDs to known verdicts or null for unchecked claims`,
+    );
+  }
+  for (const [key, value] of Object.entries(verdicts)) {
+    if (!key.trim() || !VERDICTS.has(value)) {
+      throw new Error(
+        `${caseId}: verdicts must map claim IDs to known verdicts or null for unchecked claims`,
+      );
+    }
+  }
+}
+
+/** Validate review metadata and expand the expected claim map for a case. */
+function validateCaseRecord(caseId, caseRecord, result) {
+  const status = caseRecord.reviewStatus;
+  if (!['synthetic_unreviewed', 'human_reviewed'].includes(status)) {
+    throw new Error(`${caseId}: missing/unknown reviewStatus`);
+  }
+
+  const review = caseRecord.review;
+  const hasReview =
+    !!review && (!isRecord(review) || !!Object.keys(review).length);
+  if (
+    status === 'human_reviewed' &&
+    (!hasReview || (Array.isArray(review) && !review.length))
+  ) {
+    throw new Error(`${caseId}: human_reviewed requires review provenance`);
+  }
+
+  result.provisionalExpectations ||= status !== 'human_reviewed';
+
+  const expectation = caseRecord.expected;
+  if (!isRecord(expectation)) {
+    throw new Error(`${caseId}: expected must be an object`);
+  }
+
+  const claims = expectation.claims;
+  if (!Array.isArray(claims) || !claims.length) {
+    throw new Error(`${caseId}: expected.claims must be a nonempty list`);
+  }
+
+  const expected = new Map();
+  for (const claim of claims) {
+    if (
+      !isRecord(claim) ||
+      typeof claim.id !== 'string' ||
+      !claim.id.trim() ||
+      !Object.hasOwn(claim, 'verdict')
+    ) {
+      throw new Error(`${caseId}: invalid expected claim`);
+    }
+    if (!VERDICTS.has(claim.verdict) || expected.has(claim.id)) {
+      throw new Error(`${caseId}: invalid verdict or duplicate expected claim`);
+    }
+    expected.set(claim.id, claim.verdict);
+  }
+
+  return expected;
+}
+
+/** Compare expected and actual claim verdicts within a single case. */
+function accumulateCaseClaims(result, caseId, expected, actual) {
+  result.expectedClaims += expected.size;
+
+  for (const [claimId, verdict] of expected) {
+    if (!Object.hasOwn(actual, claimId)) {
+      result.missingClaims.push({ caseId, claimId });
+      continue;
+    }
+    if (actual[claimId] === verdict) {
+      result.matchingVerdicts++;
+      continue;
+    }
+    result.disagreements.push({
+      caseId,
+      claimId,
+      expected: verdict,
+      actual: actual[claimId],
+    });
+  }
+
+  for (const claimId of Object.keys(actual)) {
+    if (!expected.has(claimId)) {
+      result.unexpectedClaims.push({ caseId, claimId });
+    }
+  }
+}
+
 /** Compare verdict labels while leaving behavioral dimensions explicitly unscored.
  * @param {Map<string, object>} cases - Expected case records.
  * @param {Map<string, object>} predictions - Submitted prediction records.
@@ -68,10 +161,12 @@ function compare(cases, predictions) {
     provisionalExpectations: false,
     expectedClaims: 0,
     matchingVerdicts: 0,
-    missingCases: [...cases.keys()].filter((id) => !predictions.has(id)).sort(),
+    missingCases: [...cases.keys()]
+      .filter((id) => !predictions.has(id))
+      .sort((a, b) => a.localeCompare(b)),
     unexpectedCases: [...predictions.keys()]
       .filter((id) => !cases.has(id))
-      .sort(),
+      .sort((a, b) => a.localeCompare(b)),
     disagreements: [],
     missingClaims: [],
     unexpectedClaims: [],
@@ -85,72 +180,17 @@ function compare(cases, predictions) {
       'required/forbidden free-text findings',
     ],
   };
-  // Validate every supplied prediction, including unexpected case IDs.
+
   for (const [caseId, prediction] of predictions) {
-    const verdicts = prediction?.verdicts;
-    if (
-      !isRecord(verdicts) ||
-      Object.entries(verdicts).some(
-        ([key, value]) => !key.trim() || !VERDICTS.has(value),
-      )
-    )
-      throw new Error(
-        `${caseId}: verdicts must map claim IDs to known verdicts or null for unchecked claims`,
-      );
+    validatePrediction(caseId, prediction);
   }
+
   for (const [caseId, caseRecord] of cases) {
-    const status = caseRecord.reviewStatus;
-    if (!['synthetic_unreviewed', 'human_reviewed'].includes(status))
-      throw new Error(`${caseId}: missing/unknown reviewStatus`);
-    const review = caseRecord.review;
-    if (
-      status === 'human_reviewed' &&
-      (!review ||
-        (isRecord(review) && !Object.keys(review).length) ||
-        (Array.isArray(review) && !review.length))
-    )
-      throw new Error(`${caseId}: human_reviewed requires review provenance`);
-    result.provisionalExpectations ||= status !== 'human_reviewed';
-    const expectation = caseRecord.expected;
-    if (!isRecord(expectation))
-      throw new Error(`${caseId}: expected must be an object`);
-    const claims = expectation.claims;
-    if (!Array.isArray(claims) || !claims.length)
-      throw new Error(`${caseId}: expected.claims must be a nonempty list`);
-    const expected = new Map();
-    for (const claim of claims) {
-      if (
-        !isRecord(claim) ||
-        typeof claim.id !== 'string' ||
-        !claim.id.trim() ||
-        !Object.hasOwn(claim, 'verdict')
-      )
-        throw new Error(`${caseId}: invalid expected claim`);
-      if (!VERDICTS.has(claim.verdict) || expected.has(claim.id))
-        throw new Error(
-          `${caseId}: invalid verdict or duplicate expected claim`,
-        );
-      expected.set(claim.id, claim.verdict);
-    }
-    result.expectedClaims += expected.size;
+    const expected = validateCaseRecord(caseId, caseRecord, result);
     const actual = predictions.get(caseId)?.verdicts || {};
-    for (const [claimId, verdict] of expected) {
-      if (!Object.hasOwn(actual, claimId))
-        result.missingClaims.push({ caseId, claimId });
-      else if (actual[claimId] === verdict) result.matchingVerdicts++;
-      else
-        result.disagreements.push({
-          caseId,
-          claimId,
-          expected: verdict,
-          actual: actual[claimId],
-        });
-    }
-    for (const claimId of Object.keys(actual)) {
-      if (!expected.has(claimId))
-        result.unexpectedClaims.push({ caseId, claimId });
-    }
+    accumulateCaseClaims(result, caseId, expected, actual);
   }
+
   result.completeAgreement = ![
     'missingCases',
     'unexpectedCases',
@@ -167,7 +207,7 @@ function compare(cases, predictions) {
  */
 function main(argv = process.argv.slice(2)) {
   const usage =
-    'Usage: node scripts/evaluate_cases.mjs <predictions.jsonl> [--cases <cases.jsonl>]';
+    'Usage: node scripts/evaluate-cases.mjs <predictions.jsonl> [--cases <cases.jsonl>]';
   try {
     const { values, positionals } = parseArgs({
       args: argv,

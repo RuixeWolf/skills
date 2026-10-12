@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 /** Parse CLI options with Node's built-in argument parser. */
 import { parseArgs } from 'node:util';
 /** Share strict JSON parsing with the evaluation helper. */
-import { isRecord, parseJson, loadJson } from './json.mjs';
+import { isRecord, loadJson } from './json.mjs';
 
 /** Preserve synchronous validation and actionable CLI diagnostics if dependencies are missing. */
 const schemaDependencies = await Promise.all([
@@ -172,12 +172,18 @@ class ReportChecks {
       }
       dependencies.delete(key);
     }
-    if (dependencies.size)
+    if (dependencies.size) {
+      const order = new Map(
+        [...table.keys()].map((key, index) => [key, index]),
+      );
       this.issue(
         'dependency_cycle',
         location,
-        `Cycle in dependencies: ${[...dependencies.keys()].sort().join(', ')}`,
+        `Cycle in dependencies: ${[...dependencies.keys()]
+          .sort((a, b) => order.get(a) - order.get(b))
+          .join(', ')}`,
       );
+    }
   }
 
   /** Verify bidirectional evidence links and all cross-collection references. */
@@ -357,12 +363,8 @@ class ReportChecks {
     }
   }
 
-  /** Check search provenance, stopping conditions, corrections, and final review. */
-  workflow() {
-    const queries = this.index(this.report.audit.queries, '/audit/queries');
-    const succeeded = [...queries.values()].some(
-      (query) => query.outcome !== 'error',
-    );
+  /** Validate the audit search status and query provenance bookkeeping. */
+  checkAuditState(queries, succeeded) {
     if (this.report.audit.onlineChecked !== succeeded)
       this.issue(
         'online_status',
@@ -373,158 +375,185 @@ class ReportChecks {
       this.refs([query.claimId], this.claims, `/audit/queries/${i}/claimId`);
       this.refs(query.sourceIds, this.sources, `/audit/queries/${i}/sourceIds`);
     });
-    this.report.claims.forEach((claim, i) => {
-      const location = `/claims/${i}`;
-      const ownQueries = new Map(
-        [...queries].filter(([, query]) => query.claimId === claim.id),
+  }
+
+  /** Validate a checked claim's investigation, stop conditions, and corrections. */
+  checkClaim(claim, index, queries) {
+    const location = `/claims/${index}`;
+    const ownQueries = new Map(
+      [...queries].filter(([, query]) => query.claimId === claim.id),
+    );
+    if (claim.status !== 'checked') {
+      if (ownQueries.size)
+        this.issue(
+          'queries_for_unchecked',
+          location,
+          'Queries were recorded; explain the incomplete investigation in reason.',
+          true,
+        );
+      return;
+    }
+
+    const verification = claim.verification;
+    const questions = this.index(
+      verification.questions,
+      `${location}/verification/questions`,
+    );
+    verification.questions.forEach((question, j) => {
+      const qpath = `${location}/verification/questions/${j}`;
+      this.claimEvidence(
+        claim.id,
+        question.evidenceIds,
+        `${qpath}/evidenceIds`,
       );
-      if (claim.status !== 'checked') {
-        if (ownQueries.size)
-          this.issue(
-            'queries_for_unchecked',
-            location,
-            'Queries were recorded; explain the incomplete investigation in reason.',
-            true,
-          );
-        return;
-      }
-      const verification = claim.verification;
-      const questions = this.index(
-        verification.questions,
-        `${location}/verification/questions`,
-      );
-      verification.questions.forEach((question, j) => {
-        const qpath = `${location}/verification/questions/${j}`;
-        this.claimEvidence(
-          claim.id,
-          question.evidenceIds,
-          `${qpath}/evidenceIds`,
-        );
-        this.refs(question.queryIds, ownQueries, `${qpath}/queryIds`);
-        if (question.status === 'resolved' && !question.evidenceIds.length)
-          this.issue(
-            'unsubstantiated_resolution',
-            qpath,
-            'Resolved questions require inspected evidence.',
-          );
-      });
-      const linked = new Set(
-        [...questions.values()].flatMap((question) => question.queryIds),
-      );
-      if ([...ownQueries.keys()].some((id) => !linked.has(id)))
+      this.refs(question.queryIds, ownQueries, `${qpath}/queryIds`);
+      if (question.status === 'resolved' && !question.evidenceIds.length)
         this.issue(
-          'unlinked_query',
-          location,
-          'Every principal query must be linked to a verification question.',
+          'unsubstantiated_resolution',
+          qpath,
+          'Resolved questions require inspected evidence.',
         );
-      const rounds = [...ownQueries.values()].reduce(
-        (highest, query) => Math.max(highest, query.round),
-        0,
-      );
-      if (verification.rounds !== rounds)
-        this.issue(
-          'round_count',
-          location,
-          'Rounds must equal the highest recorded query round, or zero.',
-        );
-      const challenged = [...ownQueries.values()].some(
-        (query) => query.purpose === 'counter' && query.outcome !== 'error',
-      );
-      if (!challenged)
-        this.issue(
-          'countersearch_incomplete',
-          location,
-          'No completed countersearch; disclose the gap.',
-          claim.verdict === 'unverified',
-        );
-      const unresolved = [...questions.values()].some(
-        (question) => question.status === 'unresolved',
-      );
-      if (unresolved && DIRECTIONAL.has(claim.verdict))
-        this.issue(
-          'unresolved_directional',
-          location,
-          'Resolve material questions before a directional verdict, including at budget exhaustion.',
-        );
-      if (unresolved && !verification.remainingGaps.length)
-        this.issue(
-          'missing_gap',
-          location,
-          'Unresolved questions need material gap explanations.',
-        );
-      const stop = verification.stopReason;
-      if (
-        stop === 'evidence_sufficient' &&
-        (unresolved ||
-          verification.remainingGaps.length ||
-          !challenged ||
-          claim.verdict === 'unverified')
-      )
-        this.issue(
-          'premature_stop',
-          location,
-          'Sufficient-evidence stop requires resolved questions, completed challenge, a directional verdict, and no material gaps.',
-        );
-      if (
-        [
-          'unresolved_conflict',
-          'tool_unavailable',
-          'source_unavailable',
-        ].includes(stop) &&
-        claim.verdict !== 'unverified'
-      )
-        this.issue(
-          'stop_verdict_conflict',
-          location,
-          'Material conflict/unavailability requires unverified.',
-        );
-      if (stop !== 'evidence_sufficient' && !verification.remainingGaps.length)
-        this.issue(
-          'missing_stop_explanation',
-          location,
-          'Explain the limiting condition in remainingGaps.',
-        );
-      const correction = claim.suggestedCorrection;
-      if (correction) {
-        this.claimEvidence(
-          claim.id,
-          correction.evidenceIds,
-          `${location}/suggestedCorrection/evidenceIds`,
-        );
-        if (
-          correction.changeKind !== 'withhold' &&
-          !correction.evidenceIds.length
-        )
-          this.issue(
-            'unsupported_correction',
-            location,
-            'A factual replacement needs supporting evidence.',
-          );
-        if (
-          claim.verdict === 'unverified' &&
-          correction.changeKind !== 'withhold'
-        )
-          this.issue(
-            'unverified_correction',
-            location,
-            'Do not invent a factual replacement for an unverified claim.',
-          );
-      }
-      for (const match of claim.historyMatches || []) {
-        if (match.reportId === this.report.reportId)
-          this.issue(
-            'self_history',
-            location,
-            'History matches must refer to an earlier report.',
-          );
-        if (match.action === 'reuse_after_recheck' && !ownQueries.size)
-          this.issue(
-            'unrefreshed_history',
-            location,
-            'Reused history needs a recorded current investigation.',
-          );
-      }
     });
+
+    const linked = new Set(
+      [...questions.values()].flatMap((question) => question.queryIds),
+    );
+    if ([...ownQueries.keys()].some((id) => !linked.has(id)))
+      this.issue(
+        'unlinked_query',
+        location,
+        'Every principal query must be linked to a verification question.',
+      );
+
+    const rounds = [...ownQueries.values()].reduce(
+      (highest, query) => Math.max(highest, query.round),
+      0,
+    );
+    if (verification.rounds !== rounds)
+      this.issue(
+        'round_count',
+        location,
+        'Rounds must equal the highest recorded query round, or zero.',
+      );
+
+    const challenged = [...ownQueries.values()].some(
+      (query) => query.purpose === 'counter' && query.outcome !== 'error',
+    );
+    const unresolved = [...questions.values()].some(
+      (question) => question.status === 'unresolved',
+    );
+    this.checkClaimStopReason(
+      claim,
+      location,
+      verification,
+      challenged,
+      unresolved,
+    );
+    this.checkClaimCorrection(claim, location);
+    this.checkHistoryMatches(claim, location, ownQueries);
+  }
+
+  /** Validate a claim's stopping logic and verdict consistency. */
+  checkClaimStopReason(claim, location, verification, challenged, unresolved) {
+    if (!challenged)
+      this.issue(
+        'countersearch_incomplete',
+        location,
+        'No completed countersearch; disclose the gap.',
+        claim.verdict === 'unverified',
+      );
+    if (unresolved && DIRECTIONAL.has(claim.verdict))
+      this.issue(
+        'unresolved_directional',
+        location,
+        'Resolve material questions before a directional verdict, including at budget exhaustion.',
+      );
+    if (unresolved && !verification.remainingGaps.length)
+      this.issue(
+        'missing_gap',
+        location,
+        'Unresolved questions need material gap explanations.',
+      );
+
+    const stop = verification.stopReason;
+    const evidenceInsufficient =
+      stop === 'evidence_sufficient' &&
+      (unresolved ||
+        verification.remainingGaps.length ||
+        !challenged ||
+        claim.verdict === 'unverified');
+    if (evidenceInsufficient)
+      this.issue(
+        'premature_stop',
+        location,
+        'Sufficient-evidence stop requires resolved questions, completed challenge, a directional verdict, and no material gaps.',
+      );
+
+    const conflictStop =
+      [
+        'unresolved_conflict',
+        'tool_unavailable',
+        'source_unavailable',
+      ].includes(stop) && claim.verdict !== 'unverified';
+    if (conflictStop)
+      this.issue(
+        'stop_verdict_conflict',
+        location,
+        'Material conflict/unavailability requires unverified.',
+      );
+
+    if (stop !== 'evidence_sufficient' && !verification.remainingGaps.length)
+      this.issue(
+        'missing_stop_explanation',
+        location,
+        'Explain the limiting condition in remainingGaps.',
+      );
+  }
+
+  /** Validate suggested factual corrections. */
+  checkClaimCorrection(claim, location) {
+    const correction = claim.suggestedCorrection;
+    if (!correction) return;
+
+    this.claimEvidence(
+      claim.id,
+      correction.evidenceIds,
+      `${location}/suggestedCorrection/evidenceIds`,
+    );
+    if (correction.changeKind !== 'withhold' && !correction.evidenceIds.length)
+      this.issue(
+        'unsupported_correction',
+        location,
+        'A factual replacement needs supporting evidence.',
+      );
+    if (claim.verdict === 'unverified' && correction.changeKind !== 'withhold')
+      this.issue(
+        'unverified_correction',
+        location,
+        'Do not invent a factual replacement for an unverified claim.',
+      );
+  }
+
+  /** Check for invalid history match references and stale reuse. */
+  checkHistoryMatches(claim, location, ownQueries) {
+    for (const match of claim.historyMatches || []) {
+      if (match.reportId === this.report.reportId)
+        this.issue(
+          'self_history',
+          location,
+          'History matches must refer to an earlier report.',
+        );
+      if (match.action === 'reuse_after_recheck' && !ownQueries.size)
+        this.issue(
+          'unrefreshed_history',
+          location,
+          'Reused history needs a recorded current investigation.',
+        );
+    }
+  }
+
+  /** Validate the final review coverage for checked claims. */
+  checkReviewState() {
     const review = this.report.audit.finalReview;
     this.refs(
       review.checkedClaimIds,
@@ -554,14 +583,27 @@ class ReportChecks {
           '/audit/finalReview',
           'Complete review must cover checked claims and the summary.',
         );
-    } else {
-      this.issue(
-        'draft_review',
-        '/audit/finalReview',
-        'Final review is incomplete; treat this report as a draft.',
-        true,
-      );
+      return;
     }
+    this.issue(
+      'draft_review',
+      '/audit/finalReview',
+      'Final review is incomplete; treat this report as a draft.',
+      true,
+    );
+  }
+
+  /** Check search provenance, stopping conditions, corrections, and final review. */
+  workflow() {
+    const queries = this.index(this.report.audit.queries, '/audit/queries');
+    const succeeded = [...queries.values()].some(
+      (query) => query.outcome !== 'error',
+    );
+    this.checkAuditState(queries, succeeded);
+    this.report.claims.forEach((claim, i) =>
+      this.checkClaim(claim, i, queries),
+    );
+    this.checkReviewState();
   }
 
   /** Compare literal quotes against explicitly supplied source texts.
@@ -607,35 +649,7 @@ class ReportChecks {
    */
   revisions(previous) {
     const revision = this.report.revision;
-    if (revision) {
-      if (revision.previousReportId === this.report.reportId)
-        this.issue(
-          'revision_identity',
-          '/revision',
-          'A revision needs a new reportId.',
-        );
-      const changes = this.index(
-        revision.changes.map((change) => ({ ...change, id: change.claimId })),
-        '/revision/changes',
-      );
-      for (const [claimId, change] of changes) {
-        this.refs([claimId], this.claims, '/revision/changes/claimId');
-        this.claimEvidence(
-          claimId,
-          change.evidenceIds,
-          '/revision/changes/evidenceIds',
-        );
-        if (
-          this.claims.has(claimId) &&
-          change.newVerdict !== this.claims.get(claimId).verdict
-        )
-          this.issue(
-            'revision_new_verdict',
-            '/revision/changes',
-            'New verdict differs from the current claim.',
-          );
-      }
-    }
+    if (revision) this.checkDeclaredRevision(revision);
     if (previous === null) {
       if (revision)
         this.issue(
@@ -646,15 +660,7 @@ class ReportChecks {
         );
       return;
     }
-    const priorResult = validateReport(previous);
-    if (!priorResult.valid || previous.methodologyVersion !== '0.3') {
-      this.issue(
-        'previous_report_invalid',
-        '/revision',
-        'Comparison requires a valid v0.3 previous report with reportId.',
-      );
-      return;
-    }
+    if (!this.previousReportIsComparable(previous)) return;
     if (!revision || revision.previousReportId !== previous.reportId) {
       this.issue(
         'previous_report_link',
@@ -663,6 +669,62 @@ class ReportChecks {
       );
       return;
     }
+    this.comparePreviousRevision(previous, revision);
+  }
+
+  /** Check that declared revision changes match the current report.
+   * @param {object} revision - Declared revision metadata.
+   */
+  checkDeclaredRevision(revision) {
+    if (revision.previousReportId === this.report.reportId)
+      this.issue(
+        'revision_identity',
+        '/revision',
+        'A revision needs a new reportId.',
+      );
+    const changes = this.index(
+      revision.changes.map((change) => ({ ...change, id: change.claimId })),
+      '/revision/changes',
+    );
+    for (const [claimId, change] of changes) {
+      this.refs([claimId], this.claims, '/revision/changes/claimId');
+      this.claimEvidence(
+        claimId,
+        change.evidenceIds,
+        '/revision/changes/evidenceIds',
+      );
+      if (
+        this.claims.has(claimId) &&
+        change.newVerdict !== this.claims.get(claimId).verdict
+      )
+        this.issue(
+          'revision_new_verdict',
+          '/revision/changes',
+          'New verdict differs from the current claim.',
+        );
+    }
+  }
+
+  /** Whether a supplied prior report can be used for comparison.
+   * @param {object} previous - Supplied earlier report.
+   * @returns {boolean} Whether the prior report is valid and v0.3.
+   */
+  previousReportIsComparable(previous) {
+    const priorResult = validateReport(previous);
+    if (priorResult.valid && previous.methodologyVersion === '0.3') return true;
+    this.issue(
+      'previous_report_invalid',
+      '/revision',
+      'Comparison requires a valid v0.3 previous report with reportId.',
+    );
+    return false;
+  }
+
+  /** Compare claim IDs and verdict changes between two reports.
+   * @param {object} previous - Earlier report.
+   * @param {object} revision - Declared revision metadata.
+   */
+  comparePreviousRevision(previous, revision) {
     const before = new Map(previous.claims.map((claim) => [claim.id, claim]));
     const changes = new Map(
       revision.changes.map((change) => [change.claimId, change]),
@@ -679,36 +741,51 @@ class ReportChecks {
       );
     for (const [claimId, old] of before) {
       if (!this.claims.has(claimId)) continue;
-      const current = this.claims.get(claimId);
-      if (old.normalizedText !== current.normalizedText)
-        this.issue(
-          'claim_scope_changed',
-          '/revision',
-          `Reassess equivalence of changed wording for ${claimId}.`,
-          true,
-        );
-      const change = changes.get(claimId);
-      if (old.verdict !== current.verdict && !change)
-        this.issue(
-          'missing_revision_change',
-          '/revision/changes',
-          `Missing verdict change for ${claimId}.`,
-        );
-      if (change && change.previousVerdict !== old.verdict)
-        this.issue(
-          'revision_old_verdict',
-          '/revision/changes',
-          `Old verdict differs from previous report for ${claimId}.`,
-        );
+      this.comparePriorClaim(claimId, old, changes.get(claimId));
     }
-    for (const claimId of changes.keys()) {
-      if (!before.has(claimId))
-        this.issue(
-          'unknown_previous_claim',
-          '/revision/changes',
-          `Claim ${claimId} does not exist in the previous report.`,
-        );
-    }
+    for (const claimId of changes.keys())
+      this.checkPriorClaimExists(claimId, before);
+  }
+
+  /** Check a single claim's scope and declared verdict change.
+   * @param {string} claimId - Claim identifier.
+   * @param {object} old - Claim from the previous report.
+   * @param {object|undefined} change - Declared revision change, if any.
+   */
+  comparePriorClaim(claimId, old, change) {
+    const current = this.claims.get(claimId);
+    if (old.normalizedText !== current.normalizedText)
+      this.issue(
+        'claim_scope_changed',
+        '/revision',
+        `Reassess equivalence of changed wording for ${claimId}.`,
+        true,
+      );
+    if (old.verdict !== current.verdict && !change)
+      this.issue(
+        'missing_revision_change',
+        '/revision/changes',
+        `Missing verdict change for ${claimId}.`,
+      );
+    if (change && change.previousVerdict !== old.verdict)
+      this.issue(
+        'revision_old_verdict',
+        '/revision/changes',
+        `Old verdict differs from previous report for ${claimId}.`,
+      );
+  }
+
+  /** Report revision changes that refer to claims absent from the prior report.
+   * @param {string} claimId - Claim identifier.
+   * @param {Map<string, object>} before - Prior claim index.
+   */
+  checkPriorClaimExists(claimId, before) {
+    if (before.has(claimId)) return;
+    this.issue(
+      'unknown_previous_claim',
+      '/revision/changes',
+      `Claim ${claimId} does not exist in the previous report.`,
+    );
   }
 }
 
@@ -743,9 +820,11 @@ function validateReport(report, sourceTexts = null, previousReport = null) {
       path: error.instancePath || '/',
       message: error.message,
     }));
-    result.errors.sort((a, b) =>
-      a.path < b.path ? -1 : a.path > b.path ? 1 : 0,
-    );
+    result.errors.sort((a, b) => {
+      if (a.path < b.path) return -1;
+      if (a.path > b.path) return 1;
+      return 0;
+    });
     return result;
   }
   if (
@@ -785,54 +864,103 @@ function validateReport(report, sourceTexts = null, previousReport = null) {
   return result;
 }
 
+/** Parse CLI arguments for the report validator.
+ * @param {string[]} argv - Arguments without the Node executable and script.
+ * @param {string} usage - Usage text.
+ * @returns {{ help: boolean, reportPath: string, sourceTextsPath: string | null, previousReportPath: string | null, strict: boolean, json: boolean }}
+ */
+function parseCliOptions(argv, usage) {
+  const { values, positionals } = parseArgs({
+    args: argv,
+    allowPositionals: true,
+    options: {
+      'source-texts': { type: 'string' },
+      'previous-report': { type: 'string' },
+      strict: { type: 'boolean' },
+      json: { type: 'boolean' },
+      help: { type: 'boolean', short: 'h' },
+    },
+  });
+
+  if (values.help)
+    return {
+      help: true,
+      reportPath: '',
+      sourceTextsPath: null,
+      previousReportPath: null,
+      strict: false,
+      json: false,
+    };
+  if (positionals.length !== 1) throw new Error(usage);
+
+  return {
+    help: false,
+    reportPath: positionals[0],
+    sourceTextsPath: values['source-texts'] ?? null,
+    previousReportPath: values['previous-report'] ?? null,
+    strict: Boolean(values.strict),
+    json: Boolean(values.json),
+  };
+}
+
+/** Emit a human- or machine-readable validation result.
+ * @param {{ valid: boolean, schemaVersion: string | number, errors: Array<{ code: string, path: string, message: string }>, warnings: Array<{ code: string, path: string, message: string }> }} result
+ * @param {boolean} jsonOutput
+ */
+function logValidationResult(result, jsonOutput) {
+  if (jsonOutput) {
+    console.log(JSON.stringify(result, null, 2));
+    return;
+  }
+
+  console.log(
+    `Contract ${result.valid ? 'valid' : 'invalid'} (v${result.schemaVersion}); this is not a truth verdict.`,
+  );
+  for (const kind of ['errors', 'warnings']) {
+    for (const issue of result[kind])
+      console.log(
+        `${kind.slice(0, -1).toUpperCase()} [${issue.code}] ${issue.path}: ${issue.message}`,
+      );
+  }
+}
+
+/** Compute the CLI exit code for a validation result.
+ * @param {{ valid: boolean, warnings: Array<{ code: string, path: string, message: string }> }} result
+ * @param {boolean} strict
+ * @returns {number}
+ */
+function getExitCode(result, strict) {
+  return result.valid && !(strict && result.warnings.length) ? 0 : 1;
+}
+
 /** Run the read-only validator CLI with stable exit codes 0, 1, and 2.
  * @param {string[]} argv - Arguments without the Node executable and script.
  * @returns {number} Success, contract/strict failure, or input/usage failure.
  */
 function main(argv = process.argv.slice(2)) {
   const usage =
-    'Usage: node scripts/validate_report.mjs <report.json> [--source-texts <texts.json>] [--previous-report <previous.json>] [--strict] [--json]';
+    'Usage: node scripts/validate-report.mjs <report.json> [--source-texts <texts.json>] [--previous-report <previous.json>] [--strict] [--json]';
   try {
-    const { values, positionals } = parseArgs({
-      args: argv,
-      allowPositionals: true,
-      options: {
-        'source-texts': { type: 'string' },
-        'previous-report': { type: 'string' },
-        strict: { type: 'boolean' },
-        json: { type: 'boolean' },
-        help: { type: 'boolean', short: 'h' },
-      },
-    });
-    if (values.help) {
+    const options = parseCliOptions(argv, usage);
+    if (options.help) {
       console.log(
         `${usage}\nCheck report contracts without fetching URLs or modifying evidence/verdicts.\n--strict fails on warnings; --json emits machine-readable diagnostics.`,
       );
       return 0;
     }
-    if (positionals.length !== 1) throw new Error(usage);
+
     const result = validateReport(
-      loadJson(positionals[0]),
-      values['source-texts'] === undefined
+      loadJson(options.reportPath),
+      options.sourceTextsPath === null
         ? null
-        : loadJson(values['source-texts']),
-      values['previous-report'] === undefined
+        : loadJson(options.sourceTextsPath),
+      options.previousReportPath === null
         ? null
-        : loadJson(values['previous-report']),
+        : loadJson(options.previousReportPath),
     );
-    if (values.json) console.log(JSON.stringify(result, null, 2));
-    else {
-      console.log(
-        `Contract ${result.valid ? 'valid' : 'invalid'} (v${result.schemaVersion}); this is not a truth verdict.`,
-      );
-      for (const kind of ['errors', 'warnings']) {
-        for (const issue of result[kind])
-          console.log(
-            `${kind.slice(0, -1).toUpperCase()} [${issue.code}] ${issue.path}: ${issue.message}`,
-          );
-      }
-    }
-    return result.valid && !(values.strict && result.warnings.length) ? 0 : 1;
+
+    logValidationResult(result, options.json);
+    return getExitCode(result, options.strict);
   } catch (error) {
     const message =
       error.code === 'ERR_MODULE_NOT_FOUND'
@@ -843,6 +971,8 @@ function main(argv = process.argv.slice(2)) {
   }
 }
 
-export { loadJson, parseJson, validateReport, main };
+export { loadJson, validateReport, main };
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
   process.exitCode = main();
+
+export { parseJson } from './json.mjs';

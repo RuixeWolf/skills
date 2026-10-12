@@ -2,11 +2,32 @@
 
 A collection of reusable Agent Skills for AI coding agents.
 
-This repository contains my personal shared skills for improving consistency, code quality, documentation, development workflows, and other common software engineering tasks across compatible AI coding agents.
+This repository contains my personal shared skills for improving consistency, code quality, documentation, development workflows, verification, and other common software engineering and research tasks across compatible AI coding agents.
 
 The skills are designed to be reusable across projects and, where supported, across different agent tools such as Codex, OpenCode, Claude Code, Cursor, GitHub Copilot, and other Agent Skills-compatible tools.
 
 ## Available Skills
+
+### `fact-verifier`
+
+Provides evidence-based fact-checking for statements, pasted articles, accessible article URLs, and AI-generated answers, with `quick`, `standard`, and `deep` modes that share the same evidence standard.
+
+It covers:
+
+- Atomic claim extraction that preserves negation, quantifiers, baselines, time, place, and the original degree of certainty
+- Web evidence retrieval with counter-searches and source lineage tracing
+- Verdicts kept separate from evidence quality, argument quality, and verification confidence
+- Conditional argument and persuasion analysis, with `unverified` kept distinct from `false`
+- Evidence-backed correction suggestions and revision tracking of prior reports
+- Structured v0.3 reports with a local Node.js validator and synthetic behavioral evaluation cases
+
+Online verification requires a real search or browser tool in the host agent; the skill does not bundle or require a specific search provider.
+
+Skill source:
+
+```text
+skills/fact-verifier/SKILL.md
+```
 
 ### `jsdoc-generation`
 
@@ -34,6 +55,7 @@ Install skills using the `skills` CLI.
 ### Install a specific skill
 
 ```bash
+npx skills add RuixeWolf/skills --skill fact-verifier
 npx skills add RuixeWolf/skills --skill jsdoc-generation
 ```
 
@@ -57,6 +79,14 @@ As more skills are added, they can be installed individually using the same repo
 skills/
 ├── README.md
 └── skills/
+    ├── fact-verifier/
+    │   ├── SKILL.md
+    │   ├── README.md
+    │   ├── references/
+    │   ├── scripts/
+    │   ├── evals/
+    │   ├── tests/
+    │   └── package.json
     └── jsdoc-generation/
         └── SKILL.md
 ```
@@ -65,15 +95,16 @@ Future skills will follow the same structure:
 
 ```text
 skills/
+├── fact-verifier/
+│   ├── SKILL.md
+│   └── ...
 ├── jsdoc-generation/
-│   └── SKILL.md
-├── example-skill/
 │   └── SKILL.md
 └── another-skill/
     └── SKILL.md
 ```
 
-Each skill is self-contained in its own directory and uses `SKILL.md` as its entry point.
+Each skill is self-contained in its own directory and uses `SKILL.md` as its entry point. Supporting files such as `references/`, `scripts/`, `evals/`, and `tests/` live alongside it within the skill directory.
 
 ## Design Principles
 
@@ -133,6 +164,25 @@ npm run format:check  # Check formatting without writing
 ```
 
 Indentation, line endings, and whitespace rules come from `.editorconfig`; Prettier-specific options live in `.prettierrc.json`. CI runs `npm run format:check` on every push and pull request.
+
+Package management is standardized on npm: only `package-lock.json` files are committed, and lockfile URLs stay on the official registry (`registry.npmjs.org`) so the lockfiles remain portable. The root `.npmrc` pins the official registry for the root package; when updating dependencies inside a skill directory such as `skills/fact-verifier`, pass `--registry=https://registry.npmjs.org` to `npm install` so new lockfile entries keep the same source.
+
+### Local Skill Discovery Link
+
+Some agent tools discover project-level skills from a shared `.agents/skills` directory. To support them, the repository maps that path onto the top-level `skills` directory:
+
+```text
+.agents/skills -> skills
+```
+
+The link is created automatically when dependencies are installed (via the `postinstall` script) and can also be managed manually:
+
+```bash
+npm run skills:link    # Create the link (idempotent)
+npm run skills:unlink  # Remove the link
+```
+
+On Windows the link is a directory junction and needs no administrator rights; on macOS and Linux it is a symbolic link. The link is machine-local and excluded from version control, so there is nothing to commit. If `.agents/skills` already exists as a real directory or file, these commands refuse to touch it and exit with an error.
 
 ## Contributing
 
