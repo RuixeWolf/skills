@@ -6,11 +6,27 @@ This specification governs the Evidence-Based Fact Verification Agent. It covers
 
 Preserve the original input or a privacy-limited summary. Record the mode (`claim | article`), language, `checkedAt` with timezone, article provenance, and access status. For an article, retrieve the body, headline, captions, relevant links, and publication/update dates. If the full text cannot be accessed, restrict the assessment to the material actually read. Do not claim to have analyzed the “full article” based only on search snippets for a URL.
 
-Extract candidate claims passage by passage. Record `passageId`, paragraph/headline or character-range locator, brief original excerpt, speaker or quotation `attribution`, presentation (author assertion, quotation, denial, hypothetical, question, or satire), and surrounding context. Mark attribution `uncertain` if the text does not establish who is asserting the claim. A quotation can be a verification target, but “Person P said X” and “X is true” are different claims. Include the headline as a candidate: it may assert more than the body. Do not treat spelling, rhetoric, or a pure value judgment as a factual error.
+Extract candidate claims passage by passage. Record a passage identifier (`passages[].id` in JSON), paragraph/headline or character-range locator, brief original excerpt, speaker or quotation `attribution`, presentation (author assertion, quotation, denial, hypothetical, question, or satire), and surrounding context. Mark attribution `uncertain` if the text does not establish who is asserting the claim. A quotation can be a verification target, but “Person P said X” and “X is true” are different claims. Include the headline as a candidate: it may assert more than the body. Do not treat spelling, rhetoric, or a pure value judgment as a factual error.
 
 Classify candidates as `checkable`, `opinion`, `prediction`, `ambiguous`, or `not_claim`. When a factual statement omits an essential person, time, or place, use the interpretation most faithful to the wording and state the assumption. If plausible interpretations change the verdict, examine them separately or ask for clarification. Never silently supply a missing condition.
 
 Split a compound statement into the smallest factual propositions that can independently be true or false. For example, “Company A went bankrupt and laid off 5,000 workers” requires a claim about the relevant bankruptcy proceeding in a particular jurisdiction and period, and a separate claim about layoffs in the specified period. Connect the original and atomic claims with `parentClaimId`. Preserve negation, magnitude, causality, and comparison conditions. Do not turn “announced a plan” into “carried out the plan.”
+
+### Single-sentence inputs
+
+Treat a bare assertion as an input passage even when no article or publisher exists. For the synthetic input “The fictional Northbridge tower is 42 metres tall,” use `input.mode=claim` and a passage such as:
+
+```json
+{
+  "id": "P1",
+  "location": "input sentence 1",
+  "excerpt": "The fictional Northbridge tower is 42 metres tall.",
+  "attribution": "author",
+  "claimIds": ["C1"]
+}
+```
+
+Here `author` means an assertion made in the supplied text; it does not establish who originated it or whether the user believes it. Preserve `quoted`, `question`, or `uncertain` when those better describe the input. Link decomposed claims through `passages[].claimIds`; do not add a `passageId` property to each claim or invent an article URL. See the complete [synthetic claim report](../evals/examples/supported-report.json) for the surrounding v0.3 structure.
 
 ### Article claim selection and coverage
 
@@ -18,7 +34,7 @@ First list candidates, deduplicate them, and map their relationships. Prioritize
 
 ## 2. Search and stopping conditions
 
-For each claim, generate searches that do not presuppose a position: names and aliases, event and date, supporting terms, denials or counterexamples, neutral descriptions, official records or original datasets, early appearances, and other languages when useful. Seek suitable primary material first, then secondary reporting that can independently verify it. Primary material can still be biased or mistaken. Link principal queries to the claim and its verification questions, recording round, purpose, outcome, time, relevant sources, and failures. Follow [verification-loop.md](verification-loop.md) to assess sufficiency and refine queries.
+For each claim, generate searches that do not presuppose a position: names and aliases, event and date, supporting terms, denials or counterexamples, neutral descriptions, official records or original datasets, early appearances, and other languages when useful. Seek suitable primary material first, then secondary reporting that can independently verify it. Primary material can still be biased or mistaken. Link principal queries to the claim and its verification questions, recording round, purpose, outcome, time, relevant sources, and failures as retrieval happens. Follow [verification-loop.md](verification-loop.md) for timestamp capture, logical rounds, material gaps, and stopping decisions.
 
 Inspect the original page and evidence locator. Check that the event, region, period, and statistical definitions match. Examine versions and publication dates; search-result ordering is not chronological evidence. Complete at least one active countersearch per checked factual claim before a directional verdict. Failed countersearches leave this step incomplete; use `unverified` and explain the limitation. Record “not found” as a search outcome and coverage limitation, not proof of nonexistence. Do not silently discard an inaccessible or suspect source.
 
@@ -28,6 +44,8 @@ Stop when key premises are covered, the most plausible alternative explanations 
 
 A `source` is a locatable carrier of information; an `evidence` item is a short passage, datum, or verifiable observation relevant to one claim. A page may provide multiple evidence items, and the same material may have different stances toward different claims. Record `claimId`, `sourceId`, `locator`, `contentKind` (`quote | summary`), `excerptOrSummary`, language, applicability (period/region/population), stance, directness, quality and rationale. Record publisher, source type, publication/retrieval times and access status on the source. Use null for unknown scope fields rather than guessing. If retaining a permitted snapshot, identify its local artifact and hash; the validator never opens paths embedded in reports.
 
+Reuse one source record for the same inspected page. When one excerpt bears on several claims, create separate evidence IDs with the same `sourceId` and original locator, retaining the necessary excerpt in each item and assessing its stance and applicability separately. Shared upstream material keeps the same dependency cluster and does not become independent corroboration through repetition. See [report-schema.md](report-schema.md#reusing-a-source-across-claims) for a worked mapping.
+
 Record upstream material in `derivedFrom`: cited documents, wire stories, social posts, databases, and interviews. Use `clusterId` to group items dependent on common upstream evidence. Republishing and reanalysis of the same dataset do not create independent corroboration. If a report adds its own interview or new original data, record that contribution as a separate evidence item. Mark independence `unknown` when it cannot be established. “Earliest visible source found” is limited to the search conducted; distinguish publication, archive, and repost times. An official announcement can establish that an authority announced something without independently proving every real-world assertion in the announcement. A claim does not prove itself.
 
 ## 4. Evaluate evidence and arguments separately
@@ -35,6 +53,8 @@ Record upstream material in `derivedFrom`: cited documents, wire stories, social
 Check each evidence item for locatable provenance, coverage of the actual proposition, first-hand status, acquisition method, currency, scope, interests, and missing context; mark uncertain fields. Give a written rationale and an evidence-quality grade of `high | medium | low | unknown`. When a source reaches its conclusion through reasoning, separate asserted facts, implicit assumptions, inference, and conclusion as detailed in [argument-analysis.md](argument-analysis.md). If a table or announcement offers no explicit argument, mark argument quality `not_applicable` rather than penalizing it.
 
 Evidence quality measures how useful this particular material is for this particular claim; it is not a permanent reputation score for its publisher. Label suspected fallacies `potential`, retaining the relevant wording and explanation. Persuasive language or a sensational headline alone does not make a factual proposition false.
+
+For first-hand testimony, institutional statements, or other apparently conflicting evidence, follow [evidence-conflicts.md](evidence-conflicts.md). Match the exact proposition and observation conditions before treating disagreement as a material conflict. Neither institutional reputation nor the absence of a photograph settles a testimony's reliability.
 
 ## 5. Claim verdict, confidence, and article assessment
 

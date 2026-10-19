@@ -320,6 +320,125 @@ describe('Report validation', () => {
     assert(!codes(report).has('countersearch_incomplete'));
   });
 
+  test('non-material limitations allow sufficient evidence but material gaps do not', () => {
+    report.claims[0].verification.remainingGaps = [
+      'Whether the measurement uses the claimed baseline remains unresolved.',
+    ];
+    assert(codes(report, texts).has('premature_stop'));
+
+    report.claims[0].verification.remainingGaps = [];
+    report.limitations.push(
+      'No independent corroboration beyond the inspected primary record.',
+    );
+    const result = validateReport(report, texts);
+    assert.equal(result.valid, true, JSON.stringify(result));
+    assert.deepEqual(result.warnings, []);
+  });
+
+  test('parallel primary and counter queries can share a logical round', () => {
+    report.audit.queries[1].round = 1;
+    report.audit.queries[1].searchedAt = report.audit.queries[0].searchedAt;
+    report.claims[0].verification.rounds = 1;
+
+    const result = validateReport(report, texts);
+    assert.equal(result.valid, true, JSON.stringify(result));
+    assert.deepEqual(result.warnings, []);
+  });
+
+  test('claims can share a source and cluster with distinct evidence items', () => {
+    const secondClaim = structuredClone(report.claims[0]);
+    Object.assign(secondClaim, {
+      id: 'C2',
+      normalizedText: 'The fictional Northbridge tower register uses metres.',
+      evidenceIds: ['E2'],
+      reason: 'The same register expresses the height in metres.',
+    });
+    Object.assign(secondClaim.verification.questions[0], {
+      id: 'C2.Q1',
+      text: 'Which unit does the register use for the tower height?',
+      evidenceIds: ['E2'],
+      queryIds: ['Q3', 'Q4'],
+    });
+    report.claims.push(secondClaim);
+    report.input.textScope += ' The fictional tower register uses metres.';
+    report.passages.push({
+      id: 'P2',
+      location: 'input sentence 2',
+      excerpt: 'The fictional Northbridge tower register uses metres.',
+      attribution: 'author',
+      claimIds: ['C2'],
+    });
+    report.evidence.push({
+      ...structuredClone(report.evidence[0]),
+      id: 'E2',
+      claimId: 'C2',
+      qualityReason:
+        'The shared register directly states the measurement unit.',
+    });
+    report.audit.queries.push(
+      ...report.audit.queries.map((query, index) => ({
+        ...structuredClone(query),
+        id: `Q${index + 3}`,
+        claimId: 'C2',
+        text: `${query.text} measurement unit`,
+      })),
+    );
+    report.audit.finalReview.checkedClaimIds.push('C2');
+    report.closingSummary =
+      'Synthetic example: the height and unit claims share one fictional register and evidence cluster.';
+
+    const result = validateReport(report, texts);
+    assert.equal(result.valid, true, JSON.stringify(result));
+    assert.deepEqual(result.warnings, []);
+
+    secondClaim.evidenceIds = ['E1'];
+    secondClaim.verification.questions[0].evidenceIds = ['E1'];
+    assert(codes(report, texts).has('wrong_claim_evidence'));
+  });
+
+  test('unresolved material conflict requires unverified rather than misleading', () => {
+    report.sources.push({
+      ...structuredClone(report.sources[0]),
+      id: 'S2',
+      url: 'https://northbridge.example.test/independent-register',
+      publisher: 'Synthetic independent measurement register',
+    });
+    texts.S2 = 'The Northbridge tower is 45 metres tall.';
+    report.evidence.push({
+      ...structuredClone(report.evidence[0]),
+      id: 'E2',
+      sourceId: 'S2',
+      excerptOrSummary: texts.S2,
+      stance: 'contradicts',
+      clusterId: 'independent-register',
+    });
+    report.claims[0].evidenceIds.push('E2');
+    report.claims[0].verification.questions[0].evidenceIds.push('E2');
+    Object.assign(report.audit.queries[1], {
+      outcome: 'success',
+      sourceIds: ['S2'],
+      note: 'Simulated countersearch returns a conflicting independent record.',
+    });
+    Object.assign(report.claims[0].verification, {
+      stopReason: 'unresolved_conflict',
+      remainingGaps: [
+        'Credible same-scope observations disagree; cause unresolved.',
+      ],
+    });
+    report.claims[0].verification.questions[0].status = 'unresolved';
+    report.claims[0].verdict = 'unverified';
+    report.claims[0].reason =
+      'Synthetic same-scope primary measurements disagree: 42 m versus 45 m.';
+    report.closingSummary =
+      'Synthetic example: C1 remains unverified because the two independent records conflict.';
+    const abstention = validateReport(report, texts);
+    assert.equal(abstention.valid, true, JSON.stringify(abstention));
+
+    report.claims[0].verdict = 'misleading';
+    assert(codes(report, texts).has('stop_verdict_conflict'));
+    assert(codes(report, texts).has('unresolved_directional'));
+  });
+
   test('offline abstention remains valid with a disclosure warning', () => {
     const claim = report.claims[0];
     Object.assign(claim, { verdict: 'unverified', evidenceIds: [] });
@@ -631,7 +750,7 @@ describe('Evaluation comparison', () => {
   });
 
   test('fixtures retain provisional expectations and unscored reasoning dimensions', () => {
-    assert.equal(cases.size, 30);
+    assert.equal(cases.size, 35);
     const result = compare(cases, predictions);
     assert.equal(result.completeAgreement, true);
     assert.equal(result.provisionalExpectations, true);
